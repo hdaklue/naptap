@@ -123,6 +123,288 @@ That's it! Your tabs are now "napping" and will only wake up when needed:
 - ✅ **RTL Ready** - Perfect right-to-left support for Arabic, Hebrew, Persian
 - ✅ **Resource Efficient** - Zero wasted server processing for unused tabs
 
+## Tab API Reference
+
+### Complete Tab Configuration
+
+NapTab provides multiple ways to define tab content, giving you flexibility for different use cases:
+
+```php
+class ComprehensiveTabs extends NapTab
+{
+    protected function tabs(): array
+    {
+        return [
+            // Method 1: Controller Method (Recommended for complex logic)
+            Tab::make('dashboard', 'Dashboard')
+                ->icon('chart-bar')
+                ->badge(fn() => $this->getNotificationCount())
+                ->visible(fn() => auth()->check())
+                ->disabled(fn() => $this->isMaintenanceMode()),
+                
+            // Method 2: Direct Content (Simple HTML/Blade)
+            Tab::make('about', 'About Us')
+                ->icon('information-circle')
+                ->content('<div class="p-4">
+                    <h2>About Our Company</h2>
+                    <p>We are a leading provider...</p>
+                </div>'),
+                
+            // Method 3: Blade View (Static content)
+            Tab::make('contact', 'Contact')
+                ->icon('envelope')
+                ->content(view('pages.contact')),
+                
+            // Method 4: Livewire Component (Interactive content)
+            Tab::make('settings', 'Settings')
+                ->icon('cog-6-tooth')
+                ->livewire('user-settings', ['userId' => auth()->id()])
+                ->visible(fn() => auth()->user()->can('manage-settings')),
+                
+            // Method 5: Advanced Configuration
+            Tab::make('analytics', 'Analytics')
+                ->icon('presentation-chart-line')
+                ->badge('Pro')
+                ->badgeColor('green')
+                ->tooltip('Advanced analytics and reporting')
+                ->authorizeAccess(fn() => Gate::allows('view-analytics'))
+                ->cacheFor(300) // Cache for 5 minutes
+                ->preload(true) // Load immediately (skip nap mode)
+                ->group('reports'), // Group tabs for organization
+        ];
+    }
+
+    // Controller method for Method 1
+    public function dashboard()
+    {
+        // Heavy computation only runs when tab is clicked
+        $metrics = $this->calculateDashboardMetrics();
+        $charts = $this->generateChartData();
+        
+        return view('dashboard.overview', compact('metrics', 'charts'));
+    }
+}
+```
+
+### Tab Content Methods
+
+**1. Controller Methods (Best for Dynamic Content)**
+```php
+public function reports()
+{
+    // Database queries only execute when user clicks this tab
+    $reports = Report::with('author')
+        ->where('status', 'published')
+        ->latest()
+        ->paginate(20);
+        
+    return view('tabs.reports', compact('reports'));
+}
+```
+
+**2. Direct Content**
+```php
+Tab::make('terms', 'Terms of Service')
+    ->content('<div class="prose max-w-none">
+        <h1>Terms of Service</h1>
+        <p>By using our service...</p>
+    </div>')
+```
+
+**3. Blade Views**
+```php
+Tab::make('faq', 'FAQ')
+    ->content(view('pages.faq', ['categories' => $this->getFaqCategories()]))
+```
+
+**4. Livewire Components**
+```php
+Tab::make('chat', 'Live Chat')
+    ->livewire('chat-widget', [
+        'room' => 'support',
+        'user' => auth()->user()
+    ])
+```
+
+### Tab Visibility & Authorization
+
+```php
+Tab::make('admin', 'Admin Panel')
+    // Simple visibility check
+    ->visible(fn() => auth()->user()->isAdmin())
+    
+    // Authorization with Laravel Gates/Policies
+    ->authorizeAccess(fn() => Gate::allows('access-admin-panel'))
+    
+    // Multiple conditions
+    ->visible(function() {
+        return auth()->check() 
+            && auth()->user()->hasRole('manager')
+            && config('features.admin_enabled');
+    })
+    
+    // Disable instead of hide
+    ->disabled(fn() => $this->isMaintenanceMode())
+```
+
+### Dynamic Badges & Notifications
+
+```php
+Tab::make('inbox', 'Messages')
+    ->badge(fn() => auth()->user()->unreadMessages()->count())
+    ->badgeColor('red') // red, blue, green, yellow, purple, pink, gray
+    ->badgeVisible(fn() => auth()->user()->unreadMessages()->exists())
+    
+Tab::make('notifications', 'Notifications')
+    ->badge(function() {
+        $count = auth()->user()->unreadNotifications()->count();
+        return $count > 99 ? '99+' : $count;
+    })
+    ->badgeColor(fn() => $count > 10 ? 'red' : 'blue')
+```
+
+### Performance Controls
+
+```php
+Tab::make('heavy-report', 'Heavy Report')
+    // Cache the tab content for 10 minutes
+    ->cacheFor(600)
+    
+    // Custom cache key
+    ->cacheKey(fn() => 'report-' . auth()->id() . '-' . date('Y-m-d'))
+    
+    // Preload this tab (skip nap mode)
+    ->preload(true)
+    
+    // Lazy load with custom timeout
+    ->lazyLoad(true, 5000) // 5 second timeout
+```
+
+### Tab Grouping & Organization
+
+```php
+protected function tabs(): array
+{
+    return [
+        // Main navigation
+        Tab::make('overview', 'Overview')->group('main'),
+        Tab::make('analytics', 'Analytics')->group('main'),
+        
+        // Settings group
+        Tab::make('profile', 'Profile')->group('settings'),
+        Tab::make('security', 'Security')->group('settings'),
+        Tab::make('billing', 'Billing')->group('settings'),
+        
+        // Admin group (conditionally shown)
+        Tab::make('users', 'User Management')
+            ->group('admin')
+            ->visible(fn() => auth()->user()->isAdmin()),
+    ];
+}
+
+// Organize tabs by groups
+public function getTabGroups(): array
+{
+    return [
+        'main' => 'Dashboard',
+        'settings' => 'Settings', 
+        'admin' => 'Administration'
+    ];
+}
+```
+
+## Configuration Reference
+
+### Global Configuration Options
+
+Configure NapTab behavior globally in your `app/Providers/NapTabServiceProvider.php`:
+
+```php
+use Hdaklue\NapTab\Services\NapTabConfig;
+use Hdaklue\NapTab\Enums\*;
+
+$this->app->singleton('naptab.config', function () {
+    return NapTabConfig::create()
+        
+        // === VISUAL STYLING ===
+        ->style(TabStyle::Modern)                    // Modern | Minimal | Sharp
+        ->color(TabColor::Blue, TabColor::Gray)      // Primary, Secondary colors
+        ->radius(TabBorderRadius::Medium)            // None | Small | Medium | Large | Full
+        ->shadow(Shadow::Large)                      // None | Small | Medium | Large | ExtraLarge
+        ->spacing(TabSpacing::Normal)                // Small | Normal | Large
+        
+        // === BEHAVIOR SETTINGS ===
+        ->navModalOnMobile(true)                     // Enable modal navigation on mobile
+        ->routable(true)                             // Enable URL-based routing
+        ->enableAnimations(true)                     // Smooth transitions and animations
+        ->enableCaching(true)                        // Global caching for tab content
+        ->defaultCacheDuration(300)                  // Default cache time in seconds
+        
+        // === MOBILE SETTINGS ===
+        ->mobileBreakpoint(768)                      // Pixel width for mobile detection
+        ->tabletBreakpoint(1024)                     // Pixel width for tablet detection
+        ->swipeGestures(true)                        // Enable swipe between tabs
+        ->touchScrolling(true)                       // Enable touch scrolling navigation
+        
+        // === RTL SUPPORT ===
+        ->rtlSupport(true)                          // Enable RTL language detection
+        ->rtlLanguages(['ar', 'he', 'fa', 'ur'])   // RTL language codes
+        
+        // === ACCESSIBILITY ===
+        ->keyboardNavigation(true)                  // Enable arrow key navigation
+        ->focusManagement(true)                     // Automatic focus management
+        ->announceChanges(true)                     // Screen reader announcements
+        
+        // === PERFORMANCE ===
+        ->lazyLoadByDefault(true)                   // All tabs nap by default
+        ->prefetchAdjacent(false)                   // Prefetch adjacent tabs
+        ->debounceTabSwitching(100)                 // Debounce rapid tab switching
+        ->maxConcurrentLoads(3);                    // Limit simultaneous tab loads
+});
+```
+
+### Per-Component Configuration
+
+Override global settings for specific tab components:
+
+```php
+class SpecialTabs extends NapTab
+{
+    protected function configure(): array
+    {
+        return [
+            'style' => TabStyle::Sharp,
+            'primary_color' => TabColor::Red,
+            'mobile_modal' => false,
+            'enable_routing' => false,
+            'cache_duration' => 600, // 10 minutes
+        ];
+    }
+    
+    // Or override specific methods
+    public function cacheEnabled(): bool
+    {
+        return auth()->user()->isPremium();
+    }
+    
+    public function mobileModalEnabled(): bool
+    {
+        return false; // Always use scroll navigation
+    }
+}
+```
+
+### Environment-Based Configuration
+
+```php
+// Different settings per environment
+return NapTabConfig::create()
+    ->enableCaching(app()->environment('production'))
+    ->lazyLoadByDefault(!app()->environment('local'))
+    ->debugMode(app()->environment('local'))
+    ->style(app()->environment('production') ? TabStyle::Modern : TabStyle::Sharp);
+```
+
 ## Advanced Features
 
 ### Device-Specific Navigation

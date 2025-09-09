@@ -1,28 +1,30 @@
 # NapTab
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/hdaklue/naptab.svg?style=flat-square)](https://packagist.org/packages/hdaklue/naptab)
-[![GitHub Tests Action Status](https://img.shields.io/github/workflow/status/hdaklue/naptab/run-tests?label=tests)](https://github.com/hdaklue/naptab/actions?query=workflow%3Arun-tests+branch%3Amain)
 [![Total Downloads](https://img.shields.io/packagist/dt/hdaklue/naptab.svg?style=flat-square)](https://packagist.org/packages/hdaklue/naptab)
 
-**Advanced Laravel tabs component with Livewire 3, featuring device-specific navigation, URL routing, extensive theming, and mobile-first design.**
+**Smart Laravel tabs component with Livewire 3 where tabs "nap" until needed - featuring true lazy loading, mobile-first design, and RTL support.**
 
-Gone are the days of basic, rigid tab implementations that break on mobile devices and offer minimal customization. NapTab delivers a sophisticated, production-ready tabs solution that adapts intelligently to different devices, provides extensive theming options, and integrates seamlessly with modern Laravel applications.
+Most tab implementations load all content upfront, wasting resources and slowing your application. NapTab takes a different approach: tabs sleep (nap) until users actually need them, dramatically improving performance and user experience.
 
 ## Why NapTab?
 
-**The Problem**: Most tab implementations are afterthoughts—basic HTML with minimal styling that becomes unusable on mobile devices, lacks proper accessibility, and requires extensive custom CSS for professional appearance.
+**The Problem**: Traditional tabs load all content immediately, causing:
+- Slow initial page loads with heavy database queries running for hidden content
+- Wasted server resources processing data users may never see
+- Poor mobile experience with cramped navigation
+- No RTL support for international applications
 
-**The Solution**: NapTab is a comprehensive tabs system built specifically for modern web applications, offering device-aware navigation, professional theming, and developer-friendly APIs.
+**The Solution**: NapTab introduces "sleeping tabs" - content only loads when users actually click the tab, plus mobile-first navigation and complete RTL support.
 
-### Key Advantages
+### Core Features
 
-- **🎯 Device-Specific Navigation**: Automatically switches between desktop scroll, mobile scroll, and modal navigation based on device detection
-- **🎨 22 Professional Color Schemes**: From subtle grays to vibrant brand colors, all with proper dark mode contrast
-- **📱 Mobile-First Design**: Responsive by default with touch-friendly interactions and optimized spacing
-- **⚡ Performance Optimized**: Lazy loading, caching, and minimal DOM updates for smooth user experience
-- **♿ Accessibility Built-In**: ARIA compliant with keyboard navigation and screen reader support
-- **🛣️ URL Routing**: Clean URL patterns with `{activeTab?}` parameter support for bookmarkable tabs
-- **🔧 Zero Config to Full Control**: Works out-of-the-box but offers extensive customization when needed
+- **😴 True Lazy Loading ("Nap" Mode)**: Tabs sleep until awakened - content loads only when clicked, dramatically improving performance
+- **📱 Mobile-First Navigation**: Intelligent responsive design with device-specific navigation patterns  
+- **🌐 Complete RTL Support**: Built-in right-to-left language support with logical CSS properties
+- **⚡ Performance Focused**: Zero wasted resources - only active tabs consume server processing
+- **🎯 Smart Caching**: Avoid re-loading tab content with intelligent caching strategies
+- **🔧 Developer Friendly**: Simple API with powerful customization options
 
 ## Installation & Setup
 
@@ -114,12 +116,12 @@ class DashboardTabs extends NapTab
 </div>
 ```
 
-That's it! Your tabs now feature:
-- ✅ Device-aware navigation (scroll on desktop, modal on mobile)
-- ✅ Professional styling with proper dark mode
-- ✅ Lazy loading - tab content loads only when accessed
-- ✅ Accessibility features and keyboard navigation
-- ✅ URL-based routing for bookmarkable tabs
+That's it! Your tabs are now "napping" and will only wake up when needed:
+- ✅ **True Lazy Loading** - Heavy database queries run only when users click tabs
+- ✅ **Performance Boost** - Page loads instantly, content loads on-demand  
+- ✅ **Mobile-First** - Intelligent navigation that adapts to device type
+- ✅ **RTL Ready** - Perfect right-to-left support for Arabic, Hebrew, Persian
+- ✅ **Resource Efficient** - Zero wasted server processing for unused tabs
 
 ## Advanced Features
 

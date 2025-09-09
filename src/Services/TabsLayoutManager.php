@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Hdaklu\NapTab\Services;
+namespace Hdaklue\NapTab\Services;
 
 use Illuminate\Support\Facades\Log;
 
@@ -79,14 +79,14 @@ class TabsLayoutManager
         // Orientation classes
         if ($orientation === 'vertical' || $position === 'left' || $position === 'right') {
             $classes[] = 'flex flex-col space-y-1 p-2';
-            
+
             if ($this->config['scrollable'] ?? true) {
                 $classes[] = 'overflow-y-auto max-h-[400px]';
             }
         } else {
             // Horizontal layout
             $classes[] = '-mb-px flex space-x-8';
-            
+
             if ($this->config['scrollable'] ?? true) {
                 $classes[] = 'overflow-x-auto';
             }
@@ -142,7 +142,8 @@ class TabsLayoutManager
         // Base classes with enhanced transitions and focus
         $classes[] = 'font-medium text-sm transition-all duration-300 ease-in-out focus:outline-none group';
         $classes[] = 'focus:ring-2 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-900';
-        $classes[] = 'focus:ring-' . $primaryColor . '-500/50 focus:shadow-lg focus:shadow-' . $primaryColor . '-500/25';
+        $classes[] =
+            'focus:ring-' . $primaryColor . '-500/50 focus:shadow-lg focus:shadow-' . $primaryColor . '-500/25';
 
         // Border radius
         $classes[] = $style['radius'] ?? 'rounded-md';
@@ -151,7 +152,7 @@ class TabsLayoutManager
         if ($orientation === 'vertical' || $position === 'left' || $position === 'right') {
             // Vertical tab styling with premium enhancements
             $classes[] = 'w-full text-left px-4 py-3 mb-1 relative overflow-hidden';
-            
+
             if ($active) {
                 // Double border effect for vertical tabs
                 $classes[] = "bg-{$primaryColor}-50 dark:bg-{$primaryColor}-900/20 border border-{$primaryColor}-200 dark:border-{$primaryColor}-700";
@@ -167,7 +168,7 @@ class TabsLayoutManager
         } else {
             // Enhanced horizontal tab styling
             $classes[] = 'whitespace-nowrap py-3 px-4 relative overflow-hidden';
-            
+
             if ($this->config['full_width'] ?? false) {
                 $classes[] = 'flex-1 text-center';
             }
@@ -179,9 +180,9 @@ class TabsLayoutManager
                 $classes[] = "bg-gradient-to-t from-{$primaryColor}-50/80 to-transparent dark:from-{$primaryColor}-900/30";
                 $classes[] = "shadow-lg shadow-{$primaryColor}-500/20 dark:shadow-{$primaryColor}-400/30";
                 // Double border inner effect
-                $classes[] = "after:absolute after:bottom-0 after:left-1/2 after:transform after:-translate-x-1/2";
-                $classes[] = "after:w-[calc(100%-16px)] after:h-0.5 after:bg-white dark:after:bg-gray-900";
-                $classes[] = "after:shadow-[0_0_0_1px_rgb(59_130_246/0.5)] dark:after:shadow-[0_0_0_1px_rgb(96_165_250/0.5)]";
+                $classes[] = 'after:absolute after:bottom-0 after:left-1/2 after:transform after:-translate-x-1/2';
+                $classes[] = 'after:w-[calc(100%-16px)] after:h-0.5 after:bg-white dark:after:bg-gray-900';
+                $classes[] = 'after:shadow-[0_0_0_1px_rgb(59_130_246/0.5)] dark:after:shadow-[0_0_0_1px_rgb(96_165_250/0.5)]';
             } else {
                 $classes[] = 'border-b-4 border-transparent text-gray-600 dark:text-gray-400';
                 $classes[] = 'hover:text-gray-900 dark:hover:text-white hover:border-gray-300 dark:hover:border-gray-600';
@@ -245,21 +246,21 @@ class TabsLayoutManager
         $classes[] = 'inline-flex items-center px-2.5 py-1 text-xs font-semibold';
         $classes[] = 'transition-all duration-200 ease-in-out';
         $classes[] = 'shadow-sm ring-1 ring-inset';
-        
+
         // Use border radius from config
         $borderRadius = $style['radius'] ?? 'rounded-md';
         // Convert to badge-appropriate radius (smaller badges look better with more rounded corners)
-        $badgeRadius = match($borderRadius) {
+        $badgeRadius = match ($borderRadius) {
             'rounded-none' => 'rounded-none',
             'rounded-sm' => 'rounded',
-            'rounded' => 'rounded-md', 
+            'rounded' => 'rounded-md',
             'rounded-md' => 'rounded-lg',
             'rounded-lg' => 'rounded-xl',
             'rounded-xl' => 'rounded-2xl',
             'rounded-2xl' => 'rounded-3xl',
             'rounded-3xl' => 'rounded-full',
             'rounded-full' => 'rounded-full',
-            default => 'rounded-full'
+            default => 'rounded-full',
         };
         $classes[] = $badgeRadius;
 
@@ -337,7 +338,7 @@ class TabsLayoutManager
     {
         $colors = $this->themeConfig['colors'] ?? [];
         $primaryColor = $colors['primary'] ?? 'blue';
-        
+
         return "animate-spin rounded-full h-6 w-6 border-b-2 border-{$primaryColor}-500";
     }
 
@@ -348,19 +349,19 @@ class TabsLayoutManager
     {
         $colors = $this->themeConfig['colors'] ?? [];
         $style = $this->themeConfig['style'] ?? [];
-        
+
         $css = ':root {';
-        
+
         foreach ($colors as $name => $color) {
             $css .= "--tabs-color-{$name}: {$color};";
         }
-        
+
         foreach ($style as $name => $value) {
             $css .= "--tabs-style-{$name}: {$value};";
         }
-        
+
         $css .= '}';
-        
+
         return $css;
     }
 
@@ -412,7 +413,7 @@ class TabsLayoutManager
     {
         $classes = [];
         $position = $this->config['position'] ?? 'top';
-        
+
         // Mobile-first responsive behavior
         if ($position === 'left' || $position === 'right') {
             // Stack vertically on mobile, side layout on desktop
@@ -421,12 +422,12 @@ class TabsLayoutManager
                 $classes[] = 'md:flex-row-reverse';
             }
         }
-        
+
         // Scrollable tabs on mobile
         if ($this->config['scrollable'] ?? true) {
             $classes[] = 'overflow-x-auto md:overflow-x-visible';
         }
-        
+
         return implode(' ', array_unique($classes));
     }
 

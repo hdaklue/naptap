@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace Hdaklu\NapTab\UI;
+namespace Hdaklue\NapTab\UI;
 
 use Closure;
-use InvalidArgumentException;
-use Illuminate\Contracts\Support\Htmlable;
 use Hdaklu\NapTab\Services\NapTabConfig;
+use Illuminate\Contracts\Support\Htmlable;
+use InvalidArgumentException;
 use Livewire\Component;
 
 /**
  * Filament-style Tab configuration class with fluent API
- * 
+ *
  * @property-read string $id
- * @property-read string $label  
+ * @property-read string $label
  * @property-read ?string $icon
  * @property-read ?string $badge
  * @property-read bool $disabled
@@ -34,17 +34,17 @@ class Tab extends Component
     protected Closure|array $livewireParams = [];
     protected Closure|bool|null $authorization = null;
     protected Closure|bool|null $visibility = null;
-    protected ?Closure $beforeLoadHook = null;
-    protected ?Closure $afterLoadHook = null;
-    protected ?Closure $onErrorHook = null;
-    protected ?Closure $onSwitchHook = null;
+    protected null|Closure $beforeLoadHook = null;
+    protected null|Closure $afterLoadHook = null;
+    protected null|Closure $onErrorHook = null;
+    protected null|Closure $onSwitchHook = null;
 
     public function __construct(string $id)
     {
         if (empty(trim($id))) {
             throw new InvalidArgumentException('Tab ID cannot be empty');
         }
-        
+
         $this->id = $id;
         $this->label = ucfirst(str_replace(['-', '_'], ' ', $id));
     }
@@ -95,7 +95,7 @@ class Tab extends Component
         if ($this->livewireComponent !== null) {
             throw new InvalidArgumentException('Cannot set both content closure and Livewire component');
         }
-        
+
         $this->content = $content;
         return $this;
     }
@@ -105,7 +105,7 @@ class Tab extends Component
         if ($this->content !== null) {
             throw new InvalidArgumentException('Cannot set both content closure and Livewire component');
         }
-        
+
         $this->livewireComponent = $component;
         $this->livewireParams = $params;
         return $this;
@@ -145,12 +145,12 @@ class Tab extends Component
         return $this->evaluate($this->label);
     }
 
-    public function getIcon(): ?string
+    public function getIcon(): null|string
     {
         return $this->evaluate($this->icon);
     }
 
-    public function getBadge(): ?string
+    public function getBadge(): null|string
     {
         return $this->evaluate($this->badge);
     }
@@ -185,12 +185,12 @@ class Tab extends Component
         return true; // Default: authorized
     }
 
-    public function getContent(): ?Closure
+    public function getContent(): null|Closure
     {
         return $this->content;
     }
 
-    public function getLivewireComponent(): ?string
+    public function getLivewireComponent(): null|string
     {
         return $this->evaluate($this->livewireComponent);
     }
@@ -234,10 +234,12 @@ class Tab extends Component
     {
         // Dispatch JavaScript event
         $this->js("
-            window.dispatchEvent(new CustomEvent('tab:beforeLoad', { 
-                detail: { tabId: '{$this->id}', context: " . json_encode($context) . " } 
+            window.dispatchEvent(new CustomEvent('tab:beforeLoad', {
+                detail: { tabId: '{$this->id}', context: "
+        . json_encode($context)
+        . ' }
             }))
-        ");
+        ');
 
         return $this->beforeLoadHook ? ($this->beforeLoadHook)($this, $context) : null;
     }
@@ -246,30 +248,38 @@ class Tab extends Component
     {
         // Dispatch JavaScript event
         $this->js("
-            window.dispatchEvent(new CustomEvent('tab:afterLoad', { 
-                detail: { 
-                    tabId: '{$this->id}', 
-                    contentLength: " . strlen($content) . ",
-                    context: " . json_encode($context) . " 
-                } 
+            window.dispatchEvent(new CustomEvent('tab:afterLoad', {
+                detail: {
+                    tabId: '{$this->id}',
+                    contentLength: "
+        . strlen($content)
+        . ',
+                    context: '
+        . json_encode($context)
+        . '
+                }
             }))
-        ");
+        ');
 
         return $this->afterLoadHook ? ($this->afterLoadHook)($this, $content, $context) : null;
     }
 
     public function executeOnError(\Exception $error, array $context = []): mixed
     {
-        // Dispatch JavaScript event  
+        // Dispatch JavaScript event
         $this->js("
-            window.dispatchEvent(new CustomEvent('tab:error', { 
-                detail: { 
-                    tabId: '{$this->id}', 
-                    error: '" . addslashes($error->getMessage()) . "',
-                    context: " . json_encode($context) . " 
-                } 
+            window.dispatchEvent(new CustomEvent('tab:error', {
+                detail: {
+                    tabId: '{$this->id}',
+                    error: '"
+        . addslashes($error->getMessage())
+        . "',
+                    context: "
+        . json_encode($context)
+        . '
+                }
             }))
-        ");
+        ');
 
         return $this->onErrorHook ? ($this->onErrorHook)($this, $error, $context) : null;
     }
@@ -278,14 +288,16 @@ class Tab extends Component
     {
         // Dispatch JavaScript event
         $this->js("
-            window.dispatchEvent(new CustomEvent('tab:switch', { 
-                detail: { 
+            window.dispatchEvent(new CustomEvent('tab:switch', {
+                detail: {
                     fromTabId: '{$fromTabId}',
-                    toTabId: '{$toTabId}', 
-                    context: " . json_encode($context) . " 
-                } 
+                    toTabId: '{$toTabId}',
+                    context: "
+        . json_encode($context)
+        . '
+                }
             }))
-        ");
+        ');
 
         return $this->onSwitchHook ? ($this->onSwitchHook)($this, $fromTabId, $toTabId, $context) : null;
     }
@@ -295,18 +307,18 @@ class Tab extends Component
         if ($this->content === null) {
             return '';
         }
-        
+
         // Handle Htmlable objects
         if ($this->content instanceof Htmlable) {
             return $this->content->toHtml();
         }
-        
+
         // Handle Closure callables
         if ($this->content instanceof Closure) {
             $result = ($this->content)();
             return is_string($result) ? $result : '';
         }
-        
+
         return '';
     }
 

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Services;
+namespace Hdaklue\NapTab\Services;
 
-use App\Services\TabsCacheManager;
-use App\UI\Tab;
+use Hdaklue\NapTab\Services\TabsCacheManager;
+use Hdaklue\NapTab\UI\Tab;
 use Illuminate\Support\Facades\Log;
 
 /**

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Services;
+namespace Hdaklue\NapTab\Services;
 
 /**
  * Animation manager for tab transitions with customizable effects
@@ -32,7 +32,7 @@ class TabsAnimationManager
         $classes = [
             'transition-all',
             "duration-{$duration}",
-            $easing
+            $easing,
         ];
 
         switch ($type) {
@@ -66,7 +66,7 @@ class TabsAnimationManager
         }
 
         $duration = $this->config['duration'] ?? 200;
-        
+
         return "opacity-0 pointer-events-none transition-all duration-{$duration} ease-in-out wire:loading:opacity-100 wire:loading:pointer-events-auto";
     }
 
@@ -182,7 +182,7 @@ class TabsAnimationManager
                 .animate-scaleIn {
                     animation: none !important;
                 }
-                
+
                 [class*=\"transition-\"],
                 [class*=\"duration-\"] {
                     transition-duration: 0.01ms !important;
@@ -203,32 +203,32 @@ class TabsAnimationManager
         $type = $this->config['type'] ?? 'fade';
         $duration = $this->config['duration'] ?? 200;
 
-        return "
+        return '
             window.TabsAnimations = {
-                config: " . json_encode($this->config) . ",
-                
+                config: ' . json_encode($this->config) . ",
+
                 // Animate tab content change
                 animateTabChange: function(fromTab, toTab) {
                     if (!this.config.enabled) return;
-                    
+
                     const type = this.config.type || 'fade';
                     const duration = this.config.duration || 200;
-                    
+
                     if (fromTab) {
                         this.animateOut(fromTab, type, duration);
                     }
-                    
+
                     if (toTab) {
                         setTimeout(() => {
                             this.animateIn(toTab, type, duration);
                         }, duration / 2);
                     }
                 },
-                
+
                 // Animate element in
                 animateIn: function(element, type, duration) {
                     element.style.display = 'block';
-                    
+
                     switch (type) {
                         case 'fade':
                             element.style.opacity = '0';
@@ -255,7 +255,7 @@ class TabsAnimationManager
                             break;
                     }
                 },
-                
+
                 // Animate element out
                 animateOut: function(element, type, duration) {
                     switch (type) {
@@ -274,24 +274,24 @@ class TabsAnimationManager
                             element.style.opacity = '0';
                             break;
                     }
-                    
+
                     setTimeout(() => {
                         element.style.display = 'none';
                     }, duration);
                 },
-                
+
                 // Check for reduced motion preference
                 respectsReducedMotion: function() {
                     return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
                 },
-                
+
                 // Initialize animations
                 init: function() {
                     if (this.respectsReducedMotion()) {
                         this.config.enabled = false;
                         this.config.duration = 0;
                     }
-                    
+
                     // Listen for tab changes
                     document.addEventListener('tabs:switch', (e) => {
                         if (this.config.enabled) {
@@ -299,7 +299,7 @@ class TabsAnimationManager
                         }
                     });
                 },
-                
+
                 // Trigger tab switch animation
                 triggerTabSwitchAnimation: function(detail) {
                     const activePanel = document.querySelector('[role=\"tabpanel\"][aria-hidden=\"false\"]');
@@ -308,7 +308,7 @@ class TabsAnimationManager
                         activePanel.classList.add('animate-' + this.getAnimationClass());
                     }
                 },
-                
+
                 // Get animation class based on type
                 getAnimationClass: function() {
                     switch (this.config.type) {
@@ -318,7 +318,7 @@ class TabsAnimationManager
                     }
                 }
             };
-            
+
             // Initialize when DOM is ready
             document.addEventListener('DOMContentLoaded', function() {
                 if (window.TabsAnimations) {

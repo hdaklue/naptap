@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Services;
+namespace Hdaklue\NapTab\Services;
 
+use Hdaklue\NapTab\Services\Tab;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use App\UI\Tab;
 
 /**
  * Security manager for tabs with middleware, rate limiting, and content protection
@@ -43,7 +43,7 @@ class TabsSecurityManager
                 'key' => $key,
                 'max_attempts' => $maxAttempts,
             ]);
-            
+
             return true; // Rate limited
         }
 
@@ -69,7 +69,7 @@ class TabsSecurityManager
     /**
      * Get rate limit reset time
      */
-    public function getRateLimitResetTime(string $tabId, string $identifier): ?int
+    public function getRateLimitResetTime(string $tabId, string $identifier): null|int
     {
         if (!($this->config['rate_limiting']['enabled'] ?? false)) {
             return null;
@@ -108,7 +108,7 @@ class TabsSecurityManager
     /**
      * Validate tab access permissions
      */
-    public function canAccessTab(Tab $tab, ?string $userId = null): array
+    public function canAccessTab(Tab $tab, null|string $userId = null): array
     {
         $result = [
             'allowed' => true,
@@ -186,7 +186,7 @@ class TabsSecurityManager
         }
 
         [$csrfToken, $tabHash] = $parts;
-        
+
         // Verify Laravel CSRF token
         if ($csrfToken !== csrf_token()) {
             $this->logSecurityEvent('csrf_token_mismatch', $tabId);
@@ -232,10 +232,10 @@ class TabsSecurityManager
     {
         // Remove any potentially dangerous characters
         $tabId = preg_replace('/[^a-zA-Z0-9_-]/', '', $tabId);
-        
+
         // Limit length
         $tabId = substr($tabId, 0, 50);
-        
+
         if (empty($tabId)) {
             throw new \InvalidArgumentException('Invalid tab ID provided');
         }
@@ -270,76 +270,76 @@ class TabsSecurityManager
         return "
             window.TabsSecurity = {
                 config: {$configJson},
-                
+
                 // Check if we're being rate limited
                 checkRateLimit: function(tabId) {
                     if (!this.config.rate_limiting.enabled) {
                         return { limited: false };
                     }
-                    
+
                     const key = 'tabs_rate_limit_' + tabId;
                     const attempts = parseInt(localStorage.getItem(key) || '0');
                     const resetTime = parseInt(localStorage.getItem(key + '_reset') || '0');
-                    
+
                     // Check if reset time has passed
                     if (Date.now() > resetTime) {
                         localStorage.removeItem(key);
                         localStorage.removeItem(key + '_reset');
                         return { limited: false };
                     }
-                    
+
                     if (attempts >= this.config.rate_limiting.attempts) {
-                        return { 
-                            limited: true, 
+                        return {
+                            limited: true,
                             resetTime: resetTime,
-                            remaining: 0 
+                            remaining: 0
                         };
                     }
-                    
-                    return { 
-                        limited: false, 
-                        remaining: this.config.rate_limiting.attempts - attempts 
+
+                    return {
+                        limited: false,
+                        remaining: this.config.rate_limiting.attempts - attempts
                     };
                 },
-                
+
                 // Record a tab switch attempt
                 recordAttempt: function(tabId) {
                     if (!this.config.rate_limiting.enabled) {
                         return;
                     }
-                    
+
                     const key = 'tabs_rate_limit_' + tabId;
                     const attempts = parseInt(localStorage.getItem(key) || '0') + 1;
                     const resetTime = Date.now() + (this.config.rate_limiting.decay * 60 * 1000);
-                    
+
                     localStorage.setItem(key, attempts.toString());
                     localStorage.setItem(key + '_reset', resetTime.toString());
                 },
-                
+
                 // Sanitize content for XSS protection
                 sanitizeContent: function(content) {
                     if (!this.config.xss_protection) {
                         return content;
                     }
-                    
+
                     // Basic client-side XSS protection
                     const div = document.createElement('div');
                     div.textContent = content;
                     return div.innerHTML;
                 },
-                
+
                 // Generate CSRF token for requests
                 getCsrfToken: function(tabId) {
                     if (!this.config.csrf_enabled) {
                         return null;
                     }
-                    
+
                     const csrfToken = document.querySelector('meta[name=\"csrf-token\"]')?.getAttribute('content');
                     if (!csrfToken) {
                         console.warn('CSRF token not found in meta tag');
                         return null;
                     }
-                    
+
                     return csrfToken;
                 }
             };
@@ -351,7 +351,7 @@ class TabsSecurityManager
     private function generateRateLimitKey(string $tabId, string $identifier): string
     {
         $keyType = $this->config['rate_limiting']['key'] ?? 'ip';
-        
+
         switch ($keyType) {
             case 'user':
                 $key = auth()->id() ?: $this->request->ip();
@@ -371,8 +371,15 @@ class TabsSecurityManager
     private function stripDangerousTags(string $content): string
     {
         $dangerousTags = [
-            'script', 'iframe', 'object', 'embed', 'form', 
-            'input', 'textarea', 'select', 'button',
+            'script',
+            'iframe',
+            'object',
+            'embed',
+            'form',
+            'input',
+            'textarea',
+            'select',
+            'button',
         ];
 
         foreach ($dangerousTags as $tag) {
@@ -385,9 +392,20 @@ class TabsSecurityManager
     private function stripDangerousAttributes(string $content): string
     {
         $dangerousAttributes = [
-            'onload', 'onclick', 'onmouseover', 'onerror', 'onabort',
-            'onblur', 'onchange', 'onfocus', 'onkeydown', 'onkeyup',
-            'javascript:', 'vbscript:', 'data:', 'on\w+',
+            'onload',
+            'onclick',
+            'onmouseover',
+            'onerror',
+            'onabort',
+            'onblur',
+            'onchange',
+            'onfocus',
+            'onkeydown',
+            'onkeyup',
+            'javascript:',
+            'vbscript:',
+            'data:',
+            'on\w+',
         ];
 
         foreach ($dangerousAttributes as $attr) {
@@ -397,11 +415,11 @@ class TabsSecurityManager
         return $content;
     }
 
-    private function checkMiddleware(string $middleware, Tab $tab, ?string $userId): bool
+    private function checkMiddleware(string $middleware, Tab $tab, null|string $userId): bool
     {
         // This is a simplified middleware check
         // In a real implementation, you would integrate with Laravel's middleware system
-        
+
         switch ($middleware) {
             case 'auth':
                 return $userId !== null;
@@ -413,11 +431,11 @@ class TabsSecurityManager
         }
     }
 
-    private function checkPermissions(array $permissions, ?string $userId): bool
+    private function checkPermissions(array $permissions, null|string $userId): bool
     {
         // This is a simplified permission check
         // In a real implementation, you would integrate with your authorization system
-        
+
         if (!$userId) {
             return false;
         }
@@ -432,7 +450,7 @@ class TabsSecurityManager
         return true;
     }
 
-    private function generateContentSecurityPolicy(): ?string
+    private function generateContentSecurityPolicy(): null|string
     {
         if (!($this->config['xss_protection'] ?? true)) {
             return null;

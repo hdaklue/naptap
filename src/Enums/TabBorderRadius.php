@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Hdaklu\NapTab\Enums;
+namespace Hdaklue\NapTab\Enums;
 
 enum TabBorderRadius: string
 {

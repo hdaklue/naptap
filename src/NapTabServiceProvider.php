@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace Hdaklu\NapTab;
+namespace Hdaklue\NapTab;
 
-use Hdaklu\NapTab\Enums\BadgeSize;
-use Hdaklu\NapTab\Enums\Shadow;
-use Hdaklu\NapTab\Enums\TabBorderRadius;
-use Hdaklu\NapTab\Enums\TabColor;
-use Hdaklu\NapTab\Enums\TabSpacing;
-use Hdaklu\NapTab\Enums\TabStyle;
-use Hdaklu\NapTab\Livewire\NapTab;
-use Hdaklu\NapTab\Services\NapTabConfig;
-use Hdaklu\NapTab\Services\TabsAccessibilityManager;
-use Hdaklu\NapTab\Services\TabsHookManager;
-use Hdaklu\NapTab\Services\TabsLayoutManager;
-use Hdaklu\NapTab\Services\TabsNavigationManager;
+use Hdaklue\NapTab\Enums\BadgeSize;
+use Hdaklue\NapTab\Enums\Shadow;
+use Hdaklue\NapTab\Enums\TabBorderRadius;
+use Hdaklue\NapTab\Enums\TabColor;
+use Hdaklue\NapTab\Enums\TabSpacing;
+use Hdaklue\NapTab\Enums\TabStyle;
+use Hdaklue\NapTab\Livewire\NapTab;
+use Hdaklue\NapTab\Services\NapTabConfig;
+use Hdaklue\NapTab\Services\TabsAccessibilityManager;
+use Hdaklue\NapTab\Services\TabsHookManager;
+use Hdaklue\NapTab\Services\TabsLayoutManager;
+use Hdaklue\NapTab\Services\TabsNavigationManager;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 

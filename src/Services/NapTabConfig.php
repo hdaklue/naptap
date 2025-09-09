@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Hdaklu\NapTab\Services;
+namespace Hdaklue\NapTab\Services;
 
-use Hdaklu\NapTab\Enums\BadgeSize;
-use Hdaklu\NapTab\Enums\Shadow;
-use Hdaklu\NapTab\Enums\TabBorderRadius;
-use Hdaklu\NapTab\Enums\TabBorderWidth;
-use Hdaklu\NapTab\Enums\TabColor;
-use Hdaklu\NapTab\Enums\TabSpacing;
-use Hdaklu\NapTab\Enums\TabStyle;
-use Hdaklu\NapTab\Enums\TabTransition;
-use Hdaklu\NapTab\Enums\TabTransitionTiming;
+use Hdaklue\NapTab\Enums\BadgeSize;
+use Hdaklue\NapTab\Enums\Shadow;
+use Hdaklue\NapTab\Enums\TabBorderRadius;
+use Hdaklue\NapTab\Enums\TabBorderWidth;
+use Hdaklue\NapTab\Enums\TabColor;
+use Hdaklue\NapTab\Enums\TabSpacing;
+use Hdaklue\NapTab\Enums\TabStyle;
+use Hdaklue\NapTab\Enums\TabTransition;
+use Hdaklue\NapTab\Enums\TabTransitionTiming;
 
 /**
  * NapTab configuration service with fluent API
@@ -37,7 +37,7 @@ class NapTabConfig
     protected TabTransition $transitionDuration = TabTransition::Duration300;
     protected TabTransitionTiming $transitionTiming = TabTransitionTiming::EaseInOut;
     protected TabSpacing $spacing = TabSpacing::NORMAL;
-    protected ?TabStyle $currentStyle = null;
+    protected null|TabStyle $currentStyle = null;
 
     public static function create(): self
     {
@@ -100,12 +100,10 @@ class NapTabConfig
         return $this;
     }
 
-
     // Preset methods (for internal use by TabStyle enum)
     public function minimal(): self
     {
-        return $this
-            ->shadow(Shadow::NONE) // No shadows - clean look
+        return $this->shadow(Shadow::NONE) // No shadows - clean look
             ->border(TabBorderWidth::Thin, false) // Simple border only
             ->transition(TabTransition::Duration200)
             ->spacing(TabSpacing::SMALL)
@@ -115,8 +113,7 @@ class NapTabConfig
 
     public function modern(): self
     {
-        return $this
-            ->shadow(Shadow::LARGE) // Rich shadows
+        return $this->shadow(Shadow::LARGE) // Rich shadows
             ->border(TabBorderWidth::Thick, true) // Double border
             ->transition(TabTransition::Duration300)
             ->spacing(TabSpacing::NORMAL)
@@ -126,8 +123,7 @@ class NapTabConfig
 
     public function sharp(): self
     {
-        return $this
-            ->shadow(Shadow::NONE) // No shadows
+        return $this->shadow(Shadow::NONE) // No shadows
             ->border(TabBorderWidth::None, false) // No borders at all
             ->transition(TabTransition::Duration100)
             ->spacing(TabSpacing::NORMAL)

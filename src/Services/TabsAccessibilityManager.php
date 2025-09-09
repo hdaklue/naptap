@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Hdaklu\NapTab\Services;
+namespace Hdaklue\NapTab\Services;
 
-use Hdaklu\NapTab\UI\Tab;
+use Hdaklue\NapTab\UI\Tab;
 use Illuminate\Support\Collection;
 
 /**
@@ -170,34 +170,34 @@ class TabsAccessibilityManager
             return '';
         }
 
-        return "
+        return '
             window.TabsAccessibility = {
-                config: " . json_encode($this->config) . ",
-                
+                config: ' . json_encode($this->config) . ",
+
                 // Initialize accessibility features
                 init: function() {
                     this.setupKeyboardNavigation();
                     this.setupFocusManagement();
                     this.setupScreenReaderSupport();
                 },
-                
+
                 // Setup keyboard navigation
                 setupKeyboardNavigation: function() {
                     if (!this.config.keyboard_navigation) return;
-                    
+
                     document.addEventListener('keydown', (e) => {
                         const activeTab = document.querySelector('[role=\"tab\"][aria-selected=\"true\"]');
                         if (!activeTab) return;
-                        
+
                         const tabList = activeTab.closest('[role=\"tablist\"]');
                         if (!tabList) return;
-                        
+
                         const tabs = Array.from(tabList.querySelectorAll('[role=\"tab\"]:not([aria-disabled=\"true\"])'));
                         const currentIndex = tabs.indexOf(activeTab);
-                        
+
                         let targetIndex = currentIndex;
                         let shouldPreventDefault = true;
-                        
+
                         switch (e.key) {
                             case 'ArrowLeft':
                             case 'ArrowUp':
@@ -220,7 +220,7 @@ class TabsAccessibilityManager
                             default:
                                 shouldPreventDefault = false;
                         }
-                        
+
                         if (shouldPreventDefault) {
                             e.preventDefault();
                             if (targetIndex !== currentIndex) {
@@ -229,11 +229,11 @@ class TabsAccessibilityManager
                         }
                     });
                 },
-                
+
                 // Focus management
                 focusTab: function(tab) {
                     if (!tab) return;
-                    
+
                     // Update tabindex
                     const tabList = tab.closest('[role=\"tablist\"]');
                     tabList.querySelectorAll('[role=\"tab\"]').forEach(t => {
@@ -242,22 +242,22 @@ class TabsAccessibilityManager
                     tab.tabIndex = 0;
                     tab.focus();
                 },
-                
+
                 // Activate tab
                 activateTab: function(tab) {
                     if (!tab || tab.getAttribute('aria-disabled') === 'true') return;
-                    
+
                     // Trigger click event
                     tab.click();
-                    
+
                     // Announce to screen readers
                     this.announceToScreenReader('Activated ' + tab.textContent.trim());
                 },
-                
+
                 // Screen reader support
                 setupScreenReaderSupport: function() {
                     if (!this.config.screen_reader) return;
-                    
+
                     // Create live region for announcements
                     if (!document.getElementById('tabs-sr-live')) {
                         const liveRegion = document.createElement('div');
@@ -268,61 +268,61 @@ class TabsAccessibilityManager
                         liveRegion.style.cssText = 'position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden;';
                         document.body.appendChild(liveRegion);
                     }
-                    
+
                     // Listen for tab changes
                     document.addEventListener('tabs:switch', (e) => {
                         const tabLabel = e.detail.tabLabel || 'Tab';
                         this.announceToScreenReader('Switched to ' + tabLabel);
                     });
-                    
+
                     // Listen for loading states
                     document.addEventListener('tabs:loading', (e) => {
                         const tabLabel = e.detail.tabLabel || 'Tab';
                         this.announceToScreenReader('Loading ' + tabLabel + ' content');
                     });
-                    
+
                     // Listen for content loaded
                     document.addEventListener('tabs:loaded', (e) => {
                         const tabLabel = e.detail.tabLabel || 'Tab';
                         this.announceToScreenReader(tabLabel + ' content loaded');
                     });
-                    
+
                     // Listen for errors
                     document.addEventListener('tabs:error', (e) => {
                         const tabLabel = e.detail.tabLabel || 'Tab';
                         this.announceToScreenReader('Error loading ' + tabLabel + '. Please try again.');
                     });
                 },
-                
+
                 // Announce to screen readers
                 announceToScreenReader: function(message) {
                     if (!this.config.screen_reader) return;
-                    
+
                     const liveRegion = document.getElementById('tabs-sr-live');
                     if (liveRegion) {
                         liveRegion.textContent = message;
-                        
+
                         // Clear after announcement
                         setTimeout(() => {
                             liveRegion.textContent = '';
                         }, 1000);
                     }
                 },
-                
+
                 // Check for reduced motion preference
                 respectsReducedMotion: function() {
                     if (this.config.reduced_motion === 'ignore') return false;
                     if (this.config.reduced_motion === 'force') return true;
-                    
+
                     return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
                 },
-                
+
                 // Get appropriate transition duration based on motion preference
                 getTransitionDuration: function() {
                     return this.respectsReducedMotion() ? 0 : 200;
                 }
             };
-            
+
             // Initialize when DOM is ready
             document.addEventListener('DOMContentLoaded', function() {
                 if (window.TabsAccessibility) {
@@ -350,7 +350,7 @@ class TabsAccessibilityManager
                 white-space: nowrap !important;
                 border: 0 !important;
             }
-            
+
             /* Skip link for keyboard users */
             .tabs-skip-link {
                 position: absolute;
@@ -364,30 +364,30 @@ class TabsAccessibilityManager
                 border-radius: 4px;
                 transition: top 0.2s ease;
             }
-            
+
             .tabs-skip-link:focus {
                 top: 6px;
             }
-            
+
             /* High contrast mode */
             @media (prefers-contrast: high) {
                 [role=\"tab\"][aria-selected=\"true\"] {
                     border: 2px solid currentColor !important;
                 }
-                
+
                 [role=\"tab\"]:focus {
                     outline: 3px solid currentColor !important;
                     outline-offset: 2px !important;
                 }
             }
-            
+
             /* Focus indicators */
             [role=\"tab\"]:focus {
                 outline: 2px solid #2563eb;
                 outline-offset: 2px;
                 z-index: 1;
             }
-            
+
             /* Reduced motion */
             @media (prefers-reduced-motion: reduce) {
                 * {
@@ -408,7 +408,7 @@ class TabsAccessibilityManager
                         border-color: #fff !important;
                         color: #fff !important;
                     }
-                    
+
                     [role=\"tab\"][aria-selected=\"true\"] {
                         background: #fff !important;
                         color: #000 !important;

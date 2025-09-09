@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Hdaklu\NapTab\Services;
+namespace Hdaklue\NapTab\Services;
 
+use Hdaklus\NapTab\UI\Tab;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
-use Illuminate\Http\Request;
-use Hdaklu\NapTab\UI\Tab;
 
 /**
  * Navigation manager for different tab navigation modes and URL strategies
@@ -31,7 +31,7 @@ class TabsNavigationManager
     /**
      * Determine the active tab based on current URL and navigation mode
      */
-    public function getActiveTabFromUrl(array $availableTabs, ?string $defaultTab = null): ?string
+    public function getActiveTabFromUrl(array $availableTabs, null|string $defaultTab = null): null|string
     {
         $activeTab = null;
 
@@ -46,7 +46,7 @@ class TabsNavigationManager
 
         // Validate that the tab exists
         $tabIds = array_map(fn(Tab $tab) => $tab->getId(), $availableTabs);
-        
+
         if ($activeTab && !in_array($activeTab, $tabIds)) {
             $this->logNavigation('invalid_tab_requested', $activeTab, [
                 'available_tabs' => $tabIds,
@@ -73,7 +73,7 @@ class TabsNavigationManager
             // For SPA mode, just return current URL with tab parameter
             return $this->request->fullUrl();
         }
-        
+
         switch ($this->urlStrategy) {
             case 'path':
                 return $this->generatePathUrl($tabId, $context);
@@ -90,7 +90,7 @@ class TabsNavigationManager
     public function getNavigationAttributes(string $tabId): array
     {
         $url = $this->generateTabUrl($tabId);
-        
+
         $attributes = [
             'data-tab-id' => $tabId,
             'data-tab-url' => $url,
@@ -121,7 +121,7 @@ class TabsNavigationManager
     public function handleTabSwitch(string $newTabId, string $componentId, array $context = []): array
     {
         $startTime = microtime(true);
-        
+
         // Remember the tab if enabled
         if ($this->config['remember_tab'] ?? false) {
             $this->rememberTab($newTabId, $componentId);
@@ -182,11 +182,11 @@ class TabsNavigationManager
         return "
             window.TabsNavigation = {
                 config: {$configJson},
-                
+
                 // Handle tab navigation based on mode
                 navigateToTab: function(tabId, url, mode) {
                     mode = mode || this.config.mode;
-                    
+
                     switch (mode) {
                         case 'navigate':
                             if (window.Livewire) {
@@ -195,18 +195,18 @@ class TabsNavigationManager
                                 window.location.href = url;
                             }
                             break;
-                            
+
                         case 'reload':
                             window.location.href = url;
                             break;
-                            
+
                         case 'spa':
                         default:
                             this.handleSpaNavigation(tabId, url);
                             break;
                     }
                 },
-                
+
                 // Handle SPA navigation with history management
                 handleSpaNavigation: function(tabId, url) {
                     if (this.config.browser_history && url) {
@@ -214,24 +214,24 @@ class TabsNavigationManager
                             tab_id: tabId,
                             timestamp: Date.now()
                         };
-                        
+
                         if (window.location.href !== url) {
                             window.history.pushState(state, '', url);
                         }
                     }
-                    
+
                     // Dispatch custom event for components to handle
                     const event = new CustomEvent('tabs:navigate', {
                         detail: { tabId, url, mode: 'spa' }
                     });
                     document.dispatchEvent(event);
                 },
-                
+
                 // Handle browser back/forward navigation
                 handlePopState: function(event) {
                     if (event.state && event.state.tab_id) {
                         const event = new CustomEvent('tabs:popstate', {
-                            detail: { 
+                            detail: {
                                 tabId: event.state.tab_id,
                                 state: event.state
                             }
@@ -239,26 +239,26 @@ class TabsNavigationManager
                         document.dispatchEvent(event);
                     }
                 },
-                
+
                 // Initialize navigation handling
                 init: function() {
                     if (this.config.browser_history) {
                         window.addEventListener('popstate', this.handlePopState.bind(this));
                     }
-                    
+
                     // Handle initial deep linking
                     if (this.config.deep_linking) {
                         this.handleDeepLinking();
                     }
                 },
-                
+
                 // Handle deep linking on page load
                 handleDeepLinking: function() {
                     const urlParams = new URLSearchParams(window.location.search);
                     const pathSegments = window.location.pathname.split('/').filter(Boolean);
-                    
+
                     let targetTab = null;
-                    
+
                     if (this.config.url_strategy === 'query') {
                         targetTab = urlParams.get('tab');
                     } else if (this.config.url_strategy === 'path') {
@@ -268,7 +268,7 @@ class TabsNavigationManager
                             targetTab = pathSegments[tabIndex + 1];
                         }
                     }
-                    
+
                     if (targetTab) {
                         const event = new CustomEvent('tabs:deep-link', {
                             detail: { tabId: targetTab }
@@ -277,7 +277,7 @@ class TabsNavigationManager
                     }
                 }
             };
-            
+
             // Initialize navigation when DOM is ready
             document.addEventListener('DOMContentLoaded', function() {
                 if (window.TabsNavigation) {
@@ -318,7 +318,7 @@ class TabsNavigationManager
         }
 
         if ($this->mode === 'navigate' && !class_exists('\\Livewire\\Livewire')) {
-            $issues[] = "Navigate mode requires Livewire to be installed";
+            $issues[] = 'Navigate mode requires Livewire to be installed';
         }
 
         return $issues;
@@ -326,11 +326,11 @@ class TabsNavigationManager
 
     // Private helper methods
 
-    private function getActiveTabFromPath(): ?string
+    private function getActiveTabFromPath(): null|string
     {
         $path = $this->request->path();
         $segments = explode('/', trim($path, '/'));
-        
+
         // Check for route parameter structure like 'demo-tabs/profile' or 'settings/profile'
         if (count($segments) >= 2) {
             $lastSegment = end($segments);
@@ -341,7 +341,7 @@ class TabsNavigationManager
         return null;
     }
 
-    private function getActiveTabFromQuery(): ?string
+    private function getActiveTabFromQuery(): null|string
     {
         return $this->request->query('tab');
     }
@@ -349,7 +349,7 @@ class TabsNavigationManager
     private function generatePathUrl(string $tabId, array $context = []): string
     {
         $basePath = $this->getBasePath();
-        
+
         // Check if we're already on a route with tab parameter structure
         $currentPath = $this->request->path();
         if (preg_match('#^(.+)/([^/]+)$#', $currentPath, $matches)) {
@@ -359,7 +359,7 @@ class TabsNavigationManager
             // Fallback to current path + tab
             $url = rtrim($basePath, '/') . '/' . $tabId;
         }
-        
+
         // Add query parameters if provided
         if (!empty($context['query'])) {
             $url .= '?' . http_build_query($context['query']);
@@ -372,9 +372,9 @@ class TabsNavigationManager
     {
         $url = $this->request->url();
         $query = $this->request->query();
-        
+
         $query['tab'] = $tabId;
-        
+
         // Merge additional query parameters
         if (!empty($context['query'])) {
             $query = array_merge($query, $context['query']);
@@ -386,19 +386,19 @@ class TabsNavigationManager
     private function getBasePath(): string
     {
         $path = $this->request->path();
-        
+
         // Remove tab-specific segments
         $segments = explode('/', trim($path, '/'));
         $tabIndex = array_search('tabs', $segments);
-        
+
         if ($tabIndex !== false) {
             $segments = array_slice($segments, 0, $tabIndex);
         }
-        
+
         return '/' . implode('/', $segments);
     }
 
-    private function getRememberedTab(): ?string
+    private function getRememberedTab(): null|string
     {
         if (!($this->config['remember_tab'] ?? false)) {
             return null;
@@ -419,14 +419,14 @@ class TabsNavigationManager
         return "tabs_active_{$componentId}";
     }
 
-    private function getDefaultTab(array $availableTabs, ?string $defaultTab = null): ?string
+    private function getDefaultTab(array $availableTabs, null|string $defaultTab = null): null|string
     {
         if ($defaultTab) {
             return $defaultTab;
         }
 
         $configDefault = $this->config['default_tab'] ?? 'first';
-        
+
         switch ($configDefault) {
             case 'first':
                 return $availableTabs[0]->getId() ?? null;

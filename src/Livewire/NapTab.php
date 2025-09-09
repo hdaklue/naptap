@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Hdaklu\NapTab\Livewire;
+namespace Hdaklue\NapTab\Livewire;
 
-use Hdaklu\NapTab\UI\Tab;
-use Hdaklu\NapTab\Services\TabsNavigationManager;
-use Hdaklu\NapTab\Services\TabsHookManager;
-use Hdaklu\NapTab\Services\TabsLayoutManager;
-use Hdaklu\NapTab\Services\TabsAccessibilityManager;
-use Hdaklu\NapTab\Services\NapTabConfig;
+use Hdaklue\NapTab\Services\NapTabConfig;
+use Hdaklue\NapTab\Services\TabsAccessibilityManager;
+use Hdaklue\NapTab\Services\TabsHookManager;
+use Hdaklue\NapTab\Services\TabsLayoutManager;
+use Hdaklue\NapTab\Services\TabsNavigationManager;
+use Hdaklue\NapTab\UI\Tab;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
 use Livewire\Component;
@@ -34,13 +34,13 @@ abstract class NapTab extends Component
     protected NapTabConfig $config;
 
     abstract protected function tabs(): array;
-    
+
     /**
      * Define the base route URL for tab navigation
      * Override this method to return the base URL (e.g., route('demo-tabs'))
      * Tab IDs will be appended to this URL for navigation
      */
-    public function baseRoute(): ?string
+    public function baseRoute(): null|string
     {
         return null;
     }
@@ -80,7 +80,7 @@ abstract class NapTab extends Component
         // Validate and set active tab with authorization check
         if ($resolvedActiveTab && $tabs->has($resolvedActiveTab)) {
             $tab = $tabs->get($resolvedActiveTab);
-            
+
             if ($tab->canAccess()) {
                 $this->activeTab = $resolvedActiveTab;
             } else {
@@ -89,7 +89,7 @@ abstract class NapTab extends Component
                 $resolvedActiveTab = null;
             }
         }
-        
+
         if (!$resolvedActiveTab || !$this->activeTab) {
             // Default to first enabled, visible, and authorized tab
             foreach ($tabs as $tab) {
@@ -131,13 +131,12 @@ abstract class NapTab extends Component
             return;
         }
 
-
         // Execute onSwitch hook if defined
         if ($tab->hasOnSwitchHook()) {
             $switchResult = $tab->executeOnSwitch($this->activeTab, $tabId, [
                 'component_id' => $this->getId(),
             ]);
-            
+
             // Allow hook to prevent switching
             if (is_array($switchResult) && isset($switchResult['cancel']) && $switchResult['cancel']) {
                 $this->addError('tab', $switchResult['message'] ?? 'Tab switch cancelled');
@@ -159,7 +158,6 @@ abstract class NapTab extends Component
             // No base route defined - fallback to SPA mode without URL change
             // Tab is already set above, no additional action needed
         }
-
     }
 
     public function loadTabContent(string $tabId): array
@@ -259,9 +257,7 @@ abstract class NapTab extends Component
 
     protected function getTabsCollection(): Collection
     {
-        return collect($this->tabs())
-            ->filter(fn(Tab $tab) => $tab->isVisible())
-            ->keyBy(fn(Tab $tab) => $tab->getId());
+        return collect($this->tabs())->filter(fn(Tab $tab) => $tab->isVisible())->keyBy(fn(Tab $tab) => $tab->getId());
     }
 
     protected function markTabAsLoaded(string $tabId): void

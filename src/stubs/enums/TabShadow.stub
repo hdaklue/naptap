@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Hdaklue\NapTab\Enums;
+namespace App\Enums;
 
-enum Shadow: string
+enum TabShadow: string
 {
     case None = 'shadow-none';
     case Small = 'shadow-sm';

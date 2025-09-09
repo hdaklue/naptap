@@ -18,42 +18,15 @@ return [
      */
 
     'default' => [
-        'style' => TabStyle::MODERN,
+        'style' => TabStyle::Modern,
         'primary_color' => TabColor::Blue,
         'secondary_color' => TabColor::Gray,
         'border_radius' => TabBorderRadius::Medium,
         'badge_radius' => TabBorderRadius::Full,
-        'spacing' => TabSpacing::NORMAL,
-        'shadow' => Shadow::NONE,
+        'spacing' => TabSpacing::Normal,
+        'shadow' => Shadow::None,
         'shadows_enabled' => false,
         'double_border' => true,
-    ],
-    /*
-     |--------------------------------------------------------------------------
-     | View Configuration
-     |--------------------------------------------------------------------------
-     |
-     | Configure which views to use for the tab components.
-     |
-     */
-
-    'views' => [
-        'tab-container' => 'naptab::components.tabs-container.index',
-        'tab-content' => 'naptab::components.tabs-container.tab-content',
-    ],
-    /*
-     |--------------------------------------------------------------------------
-     | Cache Settings
-     |--------------------------------------------------------------------------
-     |
-     | Configure caching behavior for tab content and configuration.
-     |
-     */
-
-    'cache' => [
-        'enabled' => env('NAPTAB_CACHE_ENABLED', false),
-        'ttl' => env('NAPTAB_CACHE_TTL', 3600), // 1 hour
-        'key_prefix' => env('NAPTAB_CACHE_PREFIX', 'naptab'),
     ],
     /*
      |--------------------------------------------------------------------------

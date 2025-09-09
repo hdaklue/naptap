@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Hdaklue\NapTab\Enums;
+namespace App\Enums;
 
-use Hdaklue\NapTab\Services\NapTabConfig;
+use App\Services\NapTabConfig;
 
 enum TabStyle: string
 {

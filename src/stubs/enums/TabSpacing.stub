@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Hdaklue\NapTab\Enums;
+namespace App\Enums;
 
 enum TabSpacing: string
 {
@@ -32,9 +32,9 @@ enum TabSpacing: string
     public function tabGap(): string
     {
         return match ($this) {
-            self::Small => 'gap-1', // 0.25rem = 4px
-            self::Normal => 'gap-2', // 0.5rem = 8px
-            self::Large => 'gap-4', // 1rem = 16px
+            self::Small => 'gap-1',      // 0.25rem = 4px
+            self::Normal => 'gap-2',     // 0.5rem = 8px
+            self::Large => 'gap-4',      // 1rem = 16px
         };
     }
 
@@ -42,9 +42,9 @@ enum TabSpacing: string
     public function innerGap(): string
     {
         return match ($this) {
-            self::Small => 'gap-1', // 0.25rem = 4px
-            self::Normal => 'gap-2', // 0.5rem = 8px
-            self::Large => 'gap-3', // 0.75rem = 12px
+            self::Small => 'gap-1',      // 0.25rem = 4px
+            self::Normal => 'gap-2',     // 0.5rem = 8px  
+            self::Large => 'gap-3',      // 0.75rem = 12px
         };
     }
 
@@ -52,9 +52,9 @@ enum TabSpacing: string
     public function tabPadding(): string
     {
         return match ($this) {
-            self::Small => 'py-2 px-3', // 0.5rem 0.75rem = 8px 12px
-            self::Normal => 'py-3 px-4', // 0.75rem 1rem = 12px 16px
-            self::Large => 'py-4 px-6', // 1rem 1.5rem = 16px 24px
+            self::Small => 'py-2 px-3',     // 0.5rem 0.75rem = 8px 12px
+            self::Normal => 'py-3 px-4',    // 0.75rem 1rem = 12px 16px
+            self::Large => 'py-4 px-6',     // 1rem 1.5rem = 16px 24px
         };
     }
 
@@ -62,9 +62,9 @@ enum TabSpacing: string
     public function contentMargin(): string
     {
         return match ($this) {
-            self::Small => 'mt-4', // 1rem = 16px
-            self::Normal => 'mt-6', // 1.5rem = 24px
-            self::Large => 'mt-8', // 2rem = 32px
+            self::Small => 'mt-4',       // 1rem = 16px
+            self::Normal => 'mt-6',      // 1.5rem = 24px
+            self::Large => 'mt-8',       // 2rem = 32px
         };
     }
 
@@ -72,9 +72,9 @@ enum TabSpacing: string
     public function navPadding(): string
     {
         return match ($this) {
-            self::Small => 'px-0.5', // 0.125rem = 2px
-            self::Normal => 'px-1', // 0.25rem = 4px
-            self::Large => 'px-2', // 0.5rem = 8px
+            self::Small => 'px-0.5',     // 0.125rem = 2px
+            self::Normal => 'px-1',      // 0.25rem = 4px
+            self::Large => 'px-2',       // 0.5rem = 8px
         };
     }
 }

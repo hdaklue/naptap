@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Hdaklue\NapTab\Enums;
+namespace App\Enums;
 
 enum BadgeSize: string
 {

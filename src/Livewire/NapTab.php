@@ -148,6 +148,12 @@ abstract class NapTab extends Component
         $this->activeTab = $tabId;
         $this->markTabAsLoaded($tabId);
 
+        // Dispatch tab changed event for mobile auto-scroll
+        $this->dispatch('tab-changed', [
+            'oldTab' => $oldTabId,
+            'newTab' => $tabId
+        ]);
+
         // Handle navigation based on baseRoute configuration
         $baseRouteUrl = $this->baseRoute();
         if ($baseRouteUrl) {
@@ -287,7 +293,7 @@ abstract class NapTab extends Component
         }
 
         if ($tab->hasLivewireComponent()) {
-            return view('naptab::components.tabs-container.livewire-placeholder', [
+            return view('naptab::livewire-placeholder', [
                 'component' => $tab->getLivewireComponent(),
                 'params' => $tab->getLivewireParams(),
                 'tabId' => $tab->getId(),
@@ -329,7 +335,7 @@ abstract class NapTab extends Component
 
     public function render(): View
     {
-        return view('naptab::components.tabs-container.index', [
+        return view('naptab::index', [
             'tabs' => $this->getTabsCollection(),
             'activeTab' => $this->activeTab,
             'loadedTabs' => $this->loadedTabs,

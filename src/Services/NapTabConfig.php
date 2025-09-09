@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Hdaklue\NapTab\Services;
 
 use Hdaklue\NapTab\Enums\BadgeSize;
+use Hdaklue\NapTab\Enums\ContentAnimation;
 use Hdaklue\NapTab\Enums\Shadow;
 use Hdaklue\NapTab\Enums\TabBorderRadius;
 use Hdaklue\NapTab\Enums\TabBorderWidth;
@@ -24,19 +25,21 @@ class NapTabConfig
     protected TabColor $secondaryColor = TabColor::Gray;
     protected TabBorderRadius $borderRadius = TabBorderRadius::Medium;
     protected TabBorderRadius $badgeRadius = TabBorderRadius::Full;
-    protected BadgeSize $badgeSize = BadgeSize::MEDIUM;
+    protected BadgeSize $badgeSize = BadgeSize::Medium;
     protected bool $shadowsEnabled = false;
-    protected Shadow $shadow = Shadow::LARGE;
+    protected Shadow $shadow = Shadow::Large;
     protected string $shadowColor = 'shadow-blue-500/20 dark:shadow-blue-400/30';
-    protected Shadow $hoverShadow = Shadow::MEDIUM;
+    protected Shadow $hoverShadow = Shadow::Medium;
     protected string $hoverShadowColor = 'shadow-gray-500/10 dark:shadow-gray-400/20';
-    protected Shadow $focusShadow = Shadow::LARGE;
-    protected string $focusShadowColor = 'shadow-blue-500/25';
+    protected Shadow $focusShadow = Shadow::Large;
+    protected string $focusShadowColor = 'shadow-zinc-500/25';
     protected bool $doubleBorder = true;
     protected TabBorderWidth $borderWidth = TabBorderWidth::Thick;
     protected TabTransition $transitionDuration = TabTransition::Duration300;
     protected TabTransitionTiming $transitionTiming = TabTransitionTiming::EaseInOut;
-    protected TabSpacing $spacing = TabSpacing::NORMAL;
+    protected TabSpacing $spacing = TabSpacing::Normal;
+    protected ContentAnimation $contentAnimation = ContentAnimation::Fade;
+    protected bool $mobileModalNavigation = false;
     protected null|TabStyle $currentStyle = null;
 
     public static function create(): self
@@ -62,7 +65,7 @@ class NapTabConfig
 
     public function shadow(Shadow $shadow, string $color = null): self
     {
-        $this->shadowsEnabled = $shadow !== Shadow::NONE;
+        $this->shadowsEnabled = $shadow !== Shadow::None;
         $this->shadow = $shadow;
         if ($color) {
             $this->shadowColor = $color;
@@ -103,32 +106,32 @@ class NapTabConfig
     // Preset methods (for internal use by TabStyle enum)
     public function minimal(): self
     {
-        return $this->shadow(Shadow::NONE) // No shadows - clean look
+        return $this->shadow(Shadow::None) // No shadows - clean look
             ->border(TabBorderWidth::Thin, false) // Simple border only
             ->transition(TabTransition::Duration200)
-            ->spacing(TabSpacing::SMALL)
+            ->spacing(TabSpacing::Small)
             ->radius(TabBorderRadius::Medium) // Rounded tabs
-            ->badgeSize(BadgeSize::SMALL); // Small badges for minimal look
+            ->badgeSize(BadgeSize::Small); // Small badges for minimal look
     }
 
     public function modern(): self
     {
-        return $this->shadow(Shadow::LARGE) // Rich shadows
+        return $this->shadow(Shadow::Large) // Rich shadows
             ->border(TabBorderWidth::Thick, true) // Double border
             ->transition(TabTransition::Duration300)
-            ->spacing(TabSpacing::NORMAL)
+            ->spacing(TabSpacing::Normal)
             ->radius(TabBorderRadius::Large) // Rounded corners
-            ->badgeSize(BadgeSize::LARGE); // Large badges for rich look
+            ->badgeSize(BadgeSize::Large); // Large badges for rich look
     }
 
     public function sharp(): self
     {
-        return $this->shadow(Shadow::NONE) // No shadows
+        return $this->shadow(Shadow::None) // No shadows
             ->border(TabBorderWidth::None, false) // No borders at all
             ->transition(TabTransition::Duration100)
-            ->spacing(TabSpacing::NORMAL)
+            ->spacing(TabSpacing::Normal)
             ->radius(TabBorderRadius::None) // Sharp edges - no rounding
-            ->badgeSize(BadgeSize::MEDIUM); // Medium badges for sharp look
+            ->badgeSize(BadgeSize::Medium); // Medium badges for sharp look
     }
 
     // Convert to array for template usage
@@ -167,6 +170,12 @@ class NapTabConfig
                     'tab_padding' => $this->spacing->tabPadding(),
                     'content_margin' => $this->spacing->contentMargin(),
                     'nav_padding' => $this->spacing->navPadding(),
+                ],
+                'animations' => [
+                    'content_animation' => $this->contentAnimation->value,
+                ],
+                'mobile' => [
+                    'modal_navigation' => $this->mobileModalNavigation,
                 ],
             ],
         ];
@@ -212,6 +221,18 @@ class NapTabConfig
     public function badgeSize(BadgeSize $size): self
     {
         $this->badgeSize = $size;
+        return $this;
+    }
+
+    public function contentAnimation(ContentAnimation $animation): self
+    {
+        $this->contentAnimation = $animation;
+        return $this;
+    }
+
+    public function navModalOnMobile(bool $useModal = true): self
+    {
+        $this->mobileModalNavigation = $useModal;
         return $this;
     }
 }

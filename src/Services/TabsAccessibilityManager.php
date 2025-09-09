@@ -230,6 +230,36 @@ class TabsAccessibilityManager
                     });
                 },
 
+                // Setup focus management
+                setupFocusManagement: function() {
+                    if (!this.config.keyboard_navigation) return;
+
+                    // Set initial tabindex values
+                    document.querySelectorAll('[role=\"tablist\"]').forEach(tabList => {
+                        const tabs = tabList.querySelectorAll('[role=\"tab\"]');
+                        tabs.forEach((tab, index) => {
+                            tab.tabIndex = tab.getAttribute('aria-selected') === 'true' ? 0 : -1;
+                        });
+                    });
+
+                    // Handle focus events
+                    document.addEventListener('focusin', (e) => {
+                        if (e.target.getAttribute('role') === 'tab') {
+                            this.updateTabIndex(e.target);
+                        }
+                    });
+                },
+
+                // Update tabindex for focused tab
+                updateTabIndex: function(focusedTab) {
+                    const tabList = focusedTab.closest('[role=\"tablist\"]');
+                    if (!tabList) return;
+
+                    tabList.querySelectorAll('[role=\"tab\"]').forEach(tab => {
+                        tab.tabIndex = tab === focusedTab ? 0 : -1;
+                    });
+                },
+
                 // Focus management
                 focusTab: function(tab) {
                     if (!tab) return;

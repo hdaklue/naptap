@@ -47,6 +47,11 @@ class NapTabServiceProvider extends ServiceProvider
             __DIR__ . '/../../resources/views' => resource_path('views/vendor/naptab'),
         ], 'naptab-views');
 
+        // Publish CSS files
+        $this->publishes([
+            __DIR__ . '/../../resources/css' => public_path('vendor/naptab'),
+        ], 'naptab-assets');
+
         // Load views
         $this->loadViewsFrom(__DIR__ . '/../../resources/views', 'naptab');
     }

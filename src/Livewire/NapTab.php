@@ -36,13 +36,47 @@ abstract class NapTab extends Component
     abstract protected function tabs(): array;
 
     /**
-     * Define the base route URL for tab navigation
-     * Override this method to return the base URL (e.g., route('demo-tabs'))
-     * Tab IDs will be appended to this URL for navigation
+     * Auto-detect base route from current request
+     * Uses current route with {activeTab?} parameter
      */
     public function baseRoute(): null|string
     {
-        return null;
+        if (!$this->config->isRoutable()) {
+            return null;
+        }
+
+        $currentRoute = request()->route();
+        if (!$currentRoute) {
+            return null;
+        }
+
+        // Check if route has activeTab parameter (required for routing)
+        $parameters = $currentRoute->parameterNames();
+        if (!in_array('activeTab', $parameters)) {
+            return null;
+        }
+
+        // Build base URL without the activeTab parameter
+        $routeName = $currentRoute->getName();
+        if (!$routeName) {
+            // Handle edge case: no route name - try to build URL from current URI
+            $currentUri = request()->getPathInfo();
+            $baseUri = preg_replace('/\/[^\/]*$/', '', $currentUri);
+            return $baseUri ?: null;
+        }
+
+        // Get all route parameters except activeTab
+        $routeParams = $currentRoute->parameters();
+        unset($routeParams['activeTab']);
+
+        try {
+            return route($routeName, $routeParams);
+        } catch (\Exception $e) {
+            // Fallback: try to build URL from current URI
+            $currentUri = request()->getPathInfo();
+            $baseUri = preg_replace('/\/[^\/]*$/', '', $currentUri);
+            return $baseUri ?: null;
+        }
     }
 
     public function boot(): void
@@ -154,16 +188,32 @@ abstract class NapTab extends Component
             'newTab' => $tabId
         ]);
 
-        // Handle navigation based on baseRoute configuration
-        $baseRouteUrl = $this->baseRoute();
-        if ($baseRouteUrl) {
-            // Build URL by appending the tab ID to the base route URL
-            $url = rtrim($baseRouteUrl, '/') . '/' . $tabId;
-            $this->redirect($url, navigate: true);
-        } else {
-            // No base route defined - fallback to SPA mode without URL change
-            // Tab is already set above, no additional action needed
+        // Handle navigation based on routing configuration
+        if ($this->config->isRoutable()) {
+            $currentRoute = request()->route();
+            
+            if ($currentRoute && in_array('activeTab', $currentRoute->parameterNames())) {
+                // Build URL using current route with activeTab parameter
+                $routeName = $currentRoute->getName();
+                $routeParams = $currentRoute->parameters();
+                $routeParams['activeTab'] = $tabId;
+                
+                try {
+                    if ($routeName) {
+                        $url = route($routeName, $routeParams);
+                    } else {
+                        // Handle edge case: no route name - build URL from current URI
+                        $currentUri = request()->getPathInfo();
+                        $baseUri = preg_replace('/\/[^\/]*$/', '', $currentUri);
+                        $url = $baseUri . '/' . $tabId;
+                    }
+                    $this->redirect($url, navigate: true);
+                } catch (\Exception $e) {
+                    // Fallback to SPA mode if route building fails
+                }
+            }
         }
+        // If not routable or route building failed, stay in SPA mode
     }
 
     public function loadTabContent(string $tabId): array
@@ -335,12 +385,16 @@ abstract class NapTab extends Component
 
     public function render(): View
     {
+        $config = $this->config->toArray();
+        
         return view('naptab::index', [
             'tabs' => $this->getTabsCollection(),
             'activeTab' => $this->activeTab,
             'loadedTabs' => $this->loadedTabs,
             'tabErrors' => $this->tabErrors,
             'navigationScript' => $this->getNavigationJavaScript(),
+            'styles' => $config['styles'],
+            'spacing' => $config['styles']['spacing'],
         ]);
     }
 

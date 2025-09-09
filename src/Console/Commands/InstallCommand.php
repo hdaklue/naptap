@@ -24,13 +24,18 @@ class InstallCommand extends Command
         $this->info('Installing NapTab...');
 
         $this->publishServiceProvider();
+        $this->publishAssets();
         
         $this->info('NapTab installed successfully!');
         $this->line('');
         $this->info('Next steps:');
         $this->line('1. Register app/Providers/NapTabServiceProvider.php in bootstrap/providers.php');
-        $this->line('2. Customize configuration in app/Providers/NapTabServiceProvider.php');
-        $this->line('3. Use <livewire:naptab> in your Blade templates');
+        $this->line('2. Include the CSS files in your layout:');
+        $this->line('   <link href="{{ asset(\'vendor/naptab/naptab.css\') }}" rel="stylesheet">');
+        $this->line('   <!-- AND include the safelist for dynamic colors: -->');
+        $this->line('   @import "../../vendor/hdaklue/naptab/resources/css/naptab-safelist.css";');
+        $this->line('3. Customize configuration in app/Providers/NapTabServiceProvider.php');
+        $this->line('4. Use <livewire:naptab> in your Blade templates');
         $this->line('');
         $this->warn('Remember: Add App\\Providers\\NapTabServiceProvider::class to bootstrap/providers.php');
         $this->line('');
@@ -53,6 +58,14 @@ class InstallCommand extends Command
         $this->files->put($path, $stub);
 
         $this->info('Published: ' . $path);
+    }
+
+    protected function publishAssets(): void
+    {
+        $this->call('vendor:publish', [
+            '--tag' => 'naptab-assets',
+            '--force' => $this->option('force')
+        ]);
     }
 
 

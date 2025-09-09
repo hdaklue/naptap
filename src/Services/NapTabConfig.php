@@ -40,6 +40,7 @@ class NapTabConfig
     protected TabSpacing $spacing = TabSpacing::Normal;
     protected ContentAnimation $contentAnimation = ContentAnimation::Fade;
     protected bool $mobileModalNavigation = false;
+    protected bool $routableEnabled = true;
     protected null|TabStyle $currentStyle = null;
 
     public static function create(): self
@@ -177,6 +178,9 @@ class NapTabConfig
                 'mobile' => [
                     'modal_navigation' => $this->mobileModalNavigation,
                 ],
+                'routing' => [
+                    'enabled' => $this->routableEnabled,
+                ],
             ],
         ];
     }
@@ -234,5 +238,16 @@ class NapTabConfig
     {
         $this->mobileModalNavigation = $useModal;
         return $this;
+    }
+
+    public function routable(bool $enabled = true): self
+    {
+        $this->routableEnabled = $enabled;
+        return $this;
+    }
+
+    public function isRoutable(): bool
+    {
+        return $this->routableEnabled;
     }
 }

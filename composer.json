@@ -1,6 +1,6 @@
 {
     "name": "hdaklue/naptab",
-    "description": "A powerful, customizable Livewire tabs component for Laravel with RTL support, multiple styles, and comprehensive configuration options",
+    "description": "A powerful, Loads tab only when active, customizable Livewire tabs component for Laravel with RTL support, multiple styles, and comprehensive configuration options",
     "type": "library",
     "license": "MIT",
     "authors": [
@@ -42,7 +42,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Hdaklue\\NapTab\\NapTabServiceProvider"
+                "Hdaklue\\NapTab\\Providers\\NapTabServiceProvider"
             ]
         }
     },

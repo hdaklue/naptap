@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Hdaklue\NapTab;
+namespace Hdaklue\NapTab\Providers;
 
 use Hdaklue\NapTab\Enums\BadgeSize;
 use Hdaklue\NapTab\Enums\Shadow;
@@ -52,19 +52,19 @@ class NapTabServiceProvider extends ServiceProvider
 
         // Publish views
         $this->publishes([
-            __DIR__ . '/../resources/views' => resource_path('views/vendor/naptab'),
+            __DIR__ . '/../../resources/views' => resource_path('views/vendor/naptab'),
         ], 'naptab-views');
 
         // Publish config
         $this->publishes([
-            __DIR__ . '/../config/naptab.php' => config_path('naptab.php'),
+            __DIR__ . '/../../config/naptab.php' => config_path('naptab.php'),
         ], 'naptab-config');
 
         // Load views
-        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'naptab');
+        $this->loadViewsFrom(__DIR__ . '/../../resources/views', 'naptab');
 
         // Merge config
-        $this->mergeConfigFrom(__DIR__ . '/../config/naptab.php', 'naptab');
+        $this->mergeConfigFrom(__DIR__ . '/../../config/naptab.php', 'naptab');
 
         // Make NapTabConfig available to Blade views
         view()->composer('naptab::components.*', function ($view) {

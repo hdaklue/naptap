@@ -18,7 +18,7 @@ A powerful, customizable Livewire tabs component for Laravel with RTL support, m
 You can install the package via Composer:
 
 ```bash
-composer require hdaklu/naptab
+composer require hdaklue/naptab
 ```
 
 Publish the config file (optional):

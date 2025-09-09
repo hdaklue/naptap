@@ -36,10 +36,48 @@ php artisan naptab:install
 ```
 
 The installation command automatically:
-- Publishes CSS assets to avoid Tailwind purging issues
-- Creates a service provider stub in your `app/Providers` directory
+- Publishes CSS assets to `public/vendor/naptab/` to avoid Tailwind purging issues
+- Creates `app/Providers/NapTabServiceProvider.php` with default configuration
 - Configures Tailwind CSS safelist for all theme colors
 - Sets up optimal default configuration
+
+### Post-Installation Setup
+
+**1. Register the Service Provider**
+
+Add the service provider to your `bootstrap/providers.php` file:
+
+```php
+<?php
+
+return [
+    App\Providers\AppServiceProvider::class,
+    App\Providers\NapTabServiceProvider::class, // Add this line
+];
+```
+
+**2. Include the CSS Files**
+
+Add the CSS files to your main layout (e.g., `resources/views/layouts/app.blade.php`):
+
+```blade
+<!-- NapTab Core Styles -->
+<link href="{{ asset('vendor/naptab/naptab.css') }}" rel="stylesheet">
+
+<!-- Your app CSS -->
+@vite(['resources/css/app.css', 'resources/js/app.js'])
+```
+
+**3. Import the Tailwind Safelist**
+
+In your main CSS file (e.g., `resources/css/app.css`):
+
+```css
+@import "../../vendor/hdaklue/naptab/resources/css/naptab-safelist.css";
+@tailwind base;
+@tailwind components;  
+@tailwind utilities;
+```
 
 ### Requirements
 
@@ -158,7 +196,7 @@ class ComprehensiveTabs extends NapTab
             // Method 4: Livewire Component (Interactive content)
             Tab::make('settings', 'Settings')
                 ->icon('cog-6-tooth')
-                ->livewire('user-settings', ['userId' => auth()->id()])
+                ->livewire(UserSettings::class, ['userId' => auth()->id()])
                 ->visible(fn() => auth()->user()->can('manage-settings')),
                 
             // Method 5: Advanced Configuration
@@ -220,7 +258,7 @@ Tab::make('faq', 'FAQ')
 **4. Livewire Components**
 ```php
 Tab::make('chat', 'Live Chat')
-    ->livewire('chat-widget', [
+    ->livewire(ChatWidget::class, [
         'room' => 'support',
         'user' => auth()->user()
     ])

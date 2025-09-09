@@ -1,0 +1,25 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Hdaklu\NapTab\Enums;
+
+enum TabBorderWidth: string
+{
+    case None = 'border-b-0';
+    case Thin = 'border-b';
+    case Medium = 'border-b-2';
+    case Thick = 'border-b-4';
+    case ExtraThick = 'border-b-8';
+
+    public function label(): string
+    {
+        return match ($this) {
+            self::None => 'No Border',
+            self::Thin => 'Thin Border (1px)',
+            self::Medium => 'Medium Border (2px)',
+            self::Thick => 'Thick Border (4px)',
+            self::ExtraThick => 'Extra Thick Border (8px)',
+        };
+    }
+}

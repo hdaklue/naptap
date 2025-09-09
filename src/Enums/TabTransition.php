@@ -1,0 +1,45 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Hdaklu\NapTab\Enums;
+
+enum TabTransition: string
+{
+    case Duration75 = 'duration-75';
+    case Duration100 = 'duration-100';
+    case Duration150 = 'duration-150';
+    case Duration200 = 'duration-200';
+    case Duration300 = 'duration-300';
+    case Duration500 = 'duration-500';
+    case Duration700 = 'duration-700';
+    case Duration1000 = 'duration-1000';
+
+    public function label(): string
+    {
+        return match ($this) {
+            self::Duration75 => '75ms',
+            self::Duration100 => '100ms',
+            self::Duration150 => '150ms',
+            self::Duration200 => '200ms',
+            self::Duration300 => '300ms',
+            self::Duration500 => '500ms',
+            self::Duration700 => '700ms',
+            self::Duration1000 => '1000ms',
+        };
+    }
+
+    public function milliseconds(): int
+    {
+        return match ($this) {
+            self::Duration75 => 75,
+            self::Duration100 => 100,
+            self::Duration150 => 150,
+            self::Duration200 => 200,
+            self::Duration300 => 300,
+            self::Duration500 => 500,
+            self::Duration700 => 700,
+            self::Duration1000 => 1000,
+        };
+    }
+}

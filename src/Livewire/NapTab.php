@@ -142,6 +142,57 @@ abstract class NapTab extends Component
         }
     }
 
+    /**
+     * Get the current active tab, checking route parameter if routable
+     */
+    protected function getCurrentActiveTab(): string
+    {
+        if ($this->config->isRoutable()) {
+            $currentRoute = request()->route();
+            
+            if ($currentRoute && in_array('activeTab', $currentRoute->parameterNames())) {
+                $routeActiveTab = $currentRoute->parameter('activeTab');
+                
+                if ($routeActiveTab) {
+                    $tabs = $this->getTabsCollection();
+                    
+                    // Validate the route tab
+                    if ($tabs->has($routeActiveTab)) {
+                        $tab = $tabs->get($routeActiveTab);
+                        
+                        if ($tab->canAccess()) {
+                            return $routeActiveTab;
+                        }
+                    }
+                }
+            }
+        }
+        
+        return $this->activeTab;
+    }
+
+    /**
+     * Handle component synchronization after route navigation
+     */
+    public function hydrate(): void
+    {
+        // When using routable, ensure activeTab is synchronized with route parameter
+        if ($this->config->isRoutable()) {
+            $routeActiveTab = $this->getCurrentActiveTab();
+            
+            if ($routeActiveTab !== $this->activeTab) {
+                $this->activeTab = $routeActiveTab;
+                $this->markTabAsLoaded($routeActiveTab);
+                
+                // Dispatch tab changed event for consistency
+                $this->dispatch('tab-changed', [
+                    'oldTab' => $this->activeTab,
+                    'newTab' => $routeActiveTab
+                ]);
+            }
+        }
+    }
+
     public function switchTab(string $tabId): void
     {
         // Basic validation - ensure tab ID is safe
@@ -188,32 +239,45 @@ abstract class NapTab extends Component
             'newTab' => $tabId
         ]);
 
-        // Handle navigation based on routing configuration
+        // For routable tabs, URL navigation is handled by wire:navigate in the template
+        // Only redirect programmatically if this is not a routable navigation
+        $shouldRedirect = false;
+        
         if ($this->config->isRoutable()) {
             $currentRoute = request()->route();
             
+            // Check if this is a programmatic tab switch (not from URL navigation)
             if ($currentRoute && in_array('activeTab', $currentRoute->parameterNames())) {
-                // Build URL using current route with activeTab parameter
-                $routeName = $currentRoute->getName();
-                $routeParams = $currentRoute->parameters();
-                $routeParams['activeTab'] = $tabId;
+                $currentActiveTab = $currentRoute->parameter('activeTab');
                 
-                try {
-                    if ($routeName) {
-                        $url = route($routeName, $routeParams);
-                    } else {
-                        // Handle edge case: no route name - build URL from current URI
-                        $currentUri = request()->getPathInfo();
-                        $baseUri = preg_replace('/\/[^\/]*$/', '', $currentUri);
-                        $url = $baseUri . '/' . $tabId;
-                    }
-                    $this->redirect($url, navigate: true);
-                } catch (\Exception $e) {
-                    // Fallback to SPA mode if route building fails
+                // Only redirect if we're switching to a different tab programmatically
+                if ($currentActiveTab !== $tabId) {
+                    $shouldRedirect = true;
                 }
             }
         }
-        // If not routable or route building failed, stay in SPA mode
+        
+        if ($shouldRedirect) {
+            $currentRoute = request()->route();
+            $routeName = $currentRoute->getName();
+            $routeParams = $currentRoute->parameters();
+            $routeParams['activeTab'] = $tabId;
+            
+            try {
+                if ($routeName) {
+                    $url = route($routeName, $routeParams);
+                    $this->redirect($url, navigate: true);
+                } else {
+                    // Handle edge case: no route name - build URL from current URI
+                    $currentUri = request()->getPathInfo();
+                    $baseUri = preg_replace('/\/[^\/]*$/', '', $currentUri);
+                    $url = $baseUri . '/' . $tabId;
+                    $this->redirect($url, navigate: true);
+                }
+            } catch (\Exception $e) {
+                // Fallback to SPA mode if route building fails
+            }
+        }
     }
 
     public function loadTabContent(string $tabId): array
@@ -386,6 +450,13 @@ abstract class NapTab extends Component
     public function render(): View
     {
         $config = $this->config->toArray();
+        $currentActiveTab = $this->getCurrentActiveTab();
+        
+        // Update activeTab if it changed via route
+        if ($currentActiveTab !== $this->activeTab) {
+            $this->activeTab = $currentActiveTab;
+            $this->markTabAsLoaded($currentActiveTab);
+        }
         
         return view('naptab::index', [
             'tabs' => $this->getTabsCollection(),

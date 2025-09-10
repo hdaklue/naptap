@@ -32,7 +32,6 @@ class Tab extends Component
     protected Closure|Htmlable|null $content = null;
     protected Closure|string|null $livewireComponent = null;
     protected Closure|array $livewireParams = [];
-    protected Closure|bool|null $authorization = null;
     protected Closure|bool|null $visibility = null;
     protected null|Closure $beforeLoadHook = null;
     protected null|Closure $afterLoadHook = null;
@@ -78,11 +77,6 @@ class Tab extends Component
         return $this;
     }
 
-    public function authorizeAccess(Closure|bool $authorization): self
-    {
-        $this->authorization = $authorization;
-        return $this;
-    }
 
     public function visible(Closure|bool $visible): self
     {
@@ -162,7 +156,7 @@ class Tab extends Component
 
     public function canAccess(): bool
     {
-        return $this->isVisible() && $this->isAuthorized();
+        return $this->isVisible();
     }
 
     public function isVisible(): bool
@@ -175,15 +169,6 @@ class Tab extends Component
         return true; // Default: visible
     }
 
-    public function isAuthorized(): bool
-    {
-        if ($this->authorization !== null) {
-            $result = $this->evaluate($this->authorization);
-            return is_bool($result) ? $result : true;
-        }
-
-        return true; // Default: authorized
-    }
 
     public function getContent(): null|Closure
     {

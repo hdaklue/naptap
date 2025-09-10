@@ -36,6 +36,7 @@
 @endphp
 
 <div
+    wire:key="tab-content-{{ $tab->getId() }}"
     @foreach($animationDirectives as $directive => $value)
         {{ $directive }}="{{ $value }}"
     @endforeach
@@ -56,7 +57,7 @@
         @include('naptab::loading-placeholder')
     {{-- Content State --}}
     @else
-        <div x-ref="tab-content-{{ $tab->getId() }}">
+        <div wire:key="tab-inner-{{ $tab->getId() }}" x-ref="tab-content-{{ $tab->getId() }}">
             @if($tab->hasContent())
                 {{-- Callable Content --}}
                 <div class="prose max-w-none dark:prose-invert">
@@ -66,7 +67,7 @@
                 {{-- Livewire Component --}}
                 <div>
                     @if($loaded)
-                        @livewire($tab->getLivewireComponent(), $tab->getLivewireParams(), key($tab->getId()))
+                        @livewire($tab->getLivewireComponent(), $tab->getLivewireParams(), key('tab-livewire-' . $tab->getId()))
                     @else
                         @include('naptab::livewire-placeholder', [
                             'component' => $tab->getLivewireComponent(),

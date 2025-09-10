@@ -8,5 +8,5 @@
         </svg>
     </div>
     <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">No content available</h3>
-    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">This tab doesn't have any content configured.</p>
+    {{-- <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">This tab doesn't have any content configured.</p> --}}
 </div>

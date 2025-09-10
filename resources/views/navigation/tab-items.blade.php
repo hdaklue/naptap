@@ -1,5 +1,6 @@
 {{-- Shared Tab Items Partial --}}
 @foreach($tabs as $tab)
+    <div wire:key="tab-wrapper-{{ $tab->getId() }}" class="contents">
     @php
         $config = app('naptab.config')->toArray();
         $isRoutable = $config['styles']['routing']['enabled'] ?? true;
@@ -82,9 +83,9 @@
     @endphp
     
     @if($hasUrlNavigation && $tabUrl)
-        <a href="{{ $tabUrl }}" wire:navigate
+        <a href="{{ $tabUrl }}" wire:navigate wire:key="tab-nav-{{ $tab->getId() }}"
     @else
-        <button type="button" wire:click="switchTab('{{ $tab->getId() }}')"
+        <button type="button" wire:click="switchTab('{{ $tab->getId() }}')" wire:key="tab-btn-{{ $tab->getId() }}"
     @endif
         class="{{ $isActive ? $activeClasses : $inactiveClasses }} {{ $tab->isDisabled() ? 'opacity-40 cursor-not-allowed pointer-events-none grayscale' : ($isActive ? 'cursor-default tab-active-premium' : 'cursor-pointer tab-hover-simple') }} {{ $spacing['tab_padding'] }} {{ $transitionDuration }} {{ $transitionTiming }} tab-button {{ $borderRadius }} group relative flex-shrink-0 overflow-hidden whitespace-nowrap text-sm font-medium transition-all focus:outline-none" 
         id="tab-{{ $tab->getId() }}" 
@@ -128,10 +129,7 @@
                         $inactiveBadgeClasses .= ' shadow-sm shadow-' . $secondaryColor . '-500/10 dark:shadow-' . $secondaryColor . '-400/15';
                     }
                 @endphp
-                <span x-data="{ active: '{{ $activeTab }}' === '{{ $tab->getId() }}' }"
-                    x-init="$watch('$wire.activeTab', value => active = (value === '{{ $tab->getId() }}'))"
-                    :class="active ? '{{ $activeBadgeClasses }}' : '{{ $inactiveBadgeClasses }}'"
-                    class="{{ $badgeRadius }} {{ $badgeSize }} {{ $transitionDuration }} inline-flex flex-shrink-0 items-center font-medium ring-1 ring-inset transition-all">
+                <span class="{{ $isActive ? $activeBadgeClasses : $inactiveBadgeClasses }} {{ $badgeRadius }} {{ $badgeSize }} {{ $transitionDuration }} inline-flex flex-shrink-0 items-center font-medium ring-1 ring-inset transition-all">
                     {{ $tab->getBadge() }}
                 </span>
             @endif
@@ -141,4 +139,5 @@
     @else
     </button>
     @endif
+    </div>
 @endforeach

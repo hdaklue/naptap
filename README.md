@@ -23,7 +23,7 @@ Intelligent device detection with optimized navigation:
 </div>
 
 ### 🌐 **Complete RTL Support**
-Perfect Arabic, Hebrew, and Persian language support with automatic text direction detection.
+Perfect Arabic language support with automatic text direction detection.
 
 ### 🔗 **URL Routing**
 SEO-friendly bookmarkable tabs with automatic {activeTab?} parameter handling.

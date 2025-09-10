@@ -1,6 +1,6 @@
 {
     "name": "hdaklue/naptab",
-    "description": "A powerful, Loads tab only when active, customizable Livewire tabs component for Laravel with RTL support, multiple styles, and comprehensive configuration options",
+    "description": "NapTab, A Laravel Livewire package for intelligent tabbed navigation with true lazy loading. Tabs stay asleep until activated, waking only when needed.",
     "type": "library",
     "license": "MIT",
     "authors": [

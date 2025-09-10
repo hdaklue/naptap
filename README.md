@@ -3,7 +3,7 @@
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/hdaklue/naptab.svg?style=flat-square)](https://packagist.org/packages/hdaklue/naptab)
 [![Total Downloads](https://img.shields.io/packagist/dt/hdaklue/naptab.svg?style=flat-square)](https://packagist.org/packages/hdaklue/naptab)
 
-**NapTab** is a Laravel package providing intelligent tabbed navigation with true lazy loading - tabs "nap" (sleep) until clicked, dramatically improving page performance. **4x faster initial load times** (340ms → 80ms) with mobile-first responsive design, RTL support, and seamless Laravel integration. Works perfectly with FilamentPHP, Livewire, and any Laravel package.
+**NapTab** is a Laravel Livewire package providing intelligent tabbed navigation with true lazy loading - tabs "nap" (sleep) until clicked, dramatically improving page performance. **4x faster initial load times** (340ms → 80ms) with mobile-first responsive design, RTL support, and seamless Laravel integration. Works perfectly with FilamentPHP, Livewire, and any Laravel package.
 
 ## ✨ Core Features
 

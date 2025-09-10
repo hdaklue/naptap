@@ -9,18 +9,16 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Simplified hook manager for JavaScript integration and global events
- * PHP hooks are handled directly on Tab instances
+ * Hook manager for Livewire events and global Laravel events
+ * All hooks are handled through proper Livewire event dispatching
  */
 class TabsHookManager
 {
     private array $config;
-    private bool $jsHooksEnabled;
 
     public function __construct()
     {
         $this->config = config('naptab.hooks', []);
-        $this->jsHooksEnabled = $this->config['javascript_hooks'] ?? true;
     }
 
     /**
@@ -34,68 +32,12 @@ class TabsHookManager
     }
 
     /**
-     * Get JavaScript hooks configuration for frontend
+     * Log hook execution for debugging purposes
      */
-    public function getJavaScriptHooksConfig(): array
+    public function logHookExecution(string $hookName, array $context): void
     {
-        if (!$this->jsHooksEnabled) {
-            return ['enabled' => false];
+        if ($this->config['debug'] ?? false) {
+            Log::debug("NapTab Hook Executed: {$hookName}", $context);
         }
-
-        return [
-            'enabled' => true,
-            'hooks' => $this->config['available_hooks'] ?? [],
-            'analytics' => $this->config['analytics'] ?? [],
-            'debug' => config('laravel-tabs.development.debug_mode', false),
-        ];
-    }
-
-    /**
-     * Generate JavaScript hook code for frontend integration
-     */
-    public function generateJavaScriptHooks(): string
-    {
-        if (!$this->jsHooksEnabled) {
-            return '';
-        }
-
-        $config = json_encode($this->getJavaScriptHooksConfig());
-
-        return "
-            window.TabsHooks = {
-                config: {$config},
-
-                init: function(componentId, tabs, config) {
-                    this.executeHook('init', { componentId, tabs, config });
-                },
-
-                beforeTabLoad: function(tabId, context) {
-                    return this.executeHook('beforeTabLoad', { tabId, context });
-                },
-
-                afterTabLoad: function(tabId, content, loadTime, context) {
-                    this.executeHook('afterTabLoad', { tabId, content, loadTime, context });
-                },
-
-                onTabError: function(tabId, error, context) {
-                    this.executeHook('onTabError', { tabId, error, context });
-                },
-
-                onTabSwitch: function(fromTabId, toTabId, context) {
-                    return this.executeHook('onTabSwitch', { fromTabId, toTabId, context });
-                },
-
-                executeHook: function(hookName, data) {
-                    const event = new CustomEvent('tabs:' + hookName, { detail: data });
-                    document.dispatchEvent(event);
-
-                    if (this.config.debug) {
-                        console.log('Tabs Hook:', hookName, data);
-                    }
-
-                    return data;
-                }
-            };
-        ";
     }
 }

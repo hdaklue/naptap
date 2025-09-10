@@ -18,14 +18,16 @@ use Livewire\Component;
  * NapTab - Main Livewire tabs component with URL-based state management
  *
  * @property-read string $activeTab Current active tab ID
- * @property-read Collection<Tab> $tabs Available tabs collection
+ * @property-read \Illuminate\Support\Collection<string, \Hdaklue\NapTab\UI\Tab> $tabs Available tabs collection
  */
 abstract class NapTab extends Component
 {
     public string $activeTab = '';
     public bool $wireNavigate = true; // Optional wire:navigate setup
 
+    /** @var array<string, bool> */
     protected array $loadedTabs = [];
+    /** @var array<string, string> */
     protected array $tabErrors = [];
     protected TabsNavigationManager $navigationManager;
     protected TabsHookManager $hookManager;
@@ -33,13 +35,16 @@ abstract class NapTab extends Component
     protected TabsAccessibilityManager $accessibilityManager;
     protected NapTabConfig $config;
 
+    /**
+     * @return array<\Hdaklue\NapTab\UI\Tab>
+     */
     abstract protected function tabs(): array;
 
     /**
      * Auto-detect base route from current request
      * Uses current route with {activeTab?} parameter
      */
-    public function baseRoute(): null|string
+    public function baseRoute(): string|null
     {
         if (!$this->config->isRoutable()) {
             return null;
@@ -96,17 +101,26 @@ abstract class NapTab extends Component
         return $this->config;
     }
 
-    public function mount(null|string $activeTab = null): void
+    public function mount(string|null $activeTab = null): void
     {
         $tabs = $this->getTabsCollection();
         $componentId = $this->getId();
 
-        // Dispatch global init event (optional)
-        $this->hookManager->dispatchEvent('init', [
+        // Dispatch global init event (optional) and log
+        $initContext = [
             'component_id' => $componentId,
             'tabs_count' => $tabs->count(),
             'wire_navigate' => $this->wireNavigate,
-        ]);
+        ];
+        $this->hookManager->dispatchEvent('init', $initContext);
+        $this->hookManager->logHookExecution('init', $initContext);
+        
+        // Dispatch window event using Livewire 3's js() method
+        $this->js("
+            window.dispatchEvent(new CustomEvent('tabs:init', {
+                detail: " . json_encode($initContext) . "
+            }));
+        ");
 
         // Use the route parameter directly for active tab
         $resolvedActiveTab = $activeTab;
@@ -280,9 +294,17 @@ abstract class NapTab extends Component
         }
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function loadTabContent(string $tabId): array
     {
         try {
+            // Validate tab ID format for security
+            if (!preg_match('/^[a-zA-Z0-9_-]+$/', $tabId) || strlen($tabId) > 50) {
+                throw new \Exception('Invalid tab identifier format');
+            }
+
             $tabs = $this->getTabsCollection();
 
             if (!$tabs->has($tabId)) {
@@ -303,11 +325,13 @@ abstract class NapTab extends Component
                 }
             }
 
-            // Dispatch global before load event (optional)
-            $this->hookManager->dispatchEvent('before_load', [
+            // Dispatch global before load event (optional) and log
+            $beforeLoadContext = [
                 'tab_id' => $tabId,
                 'tab_label' => $tab->getLabel(),
-            ]);
+            ];
+            $this->hookManager->dispatchEvent('before_load', $beforeLoadContext);
+            $this->hookManager->logHookExecution('before_load', $beforeLoadContext);
 
             $content = $this->renderTabContent($tab);
 
@@ -320,11 +344,13 @@ abstract class NapTab extends Component
                 }
             }
 
-            // Dispatch global after load event (optional)
-            $this->hookManager->dispatchEvent('after_load', [
+            // Dispatch global after load event (optional) and log
+            $afterLoadContext = [
                 'tab_id' => $tabId,
                 'content_length' => strlen($content),
-            ]);
+            ];
+            $this->hookManager->dispatchEvent('after_load', $afterLoadContext);
+            $this->hookManager->logHookExecution('after_load', $afterLoadContext);
 
             $this->markTabAsLoaded($tabId);
             unset($this->tabErrors[$tabId]);
@@ -365,6 +391,12 @@ abstract class NapTab extends Component
 
     public function refreshTab(string $tabId): void
     {
+        // Validate tab ID format for security
+        if (!preg_match('/^[a-zA-Z0-9_-]+$/', $tabId) || strlen($tabId) > 50) {
+            $this->addError('tab', 'Invalid tab identifier format');
+            return;
+        }
+
         unset($this->loadedTabs[$tabId]);
         unset($this->tabErrors[$tabId]);
 
@@ -375,6 +407,9 @@ abstract class NapTab extends Component
         $this->dispatch('tab:refreshed', ['tabId' => $tabId]);
     }
 
+    /**
+     * @return \Illuminate\Support\Collection<string, \Hdaklue\NapTab\UI\Tab>
+     */
     protected function getTabsCollection(): Collection
     {
         return collect($this->tabs())->filter(fn(Tab $tab) => $tab->isVisible())->keyBy(fn(Tab $tab) => $tab->getId());
@@ -395,7 +430,7 @@ abstract class NapTab extends Component
         return isset($this->tabErrors[$tabId]);
     }
 
-    protected function getTabError(string $tabId): null|string
+    protected function getTabError(string $tabId): string|null
     {
         return $this->tabErrors[$tabId] ?? null;
     }
@@ -422,6 +457,9 @@ abstract class NapTab extends Component
         return $this->activeTab;
     }
 
+    /**
+     * @return \Illuminate\Support\Collection<string, \Hdaklue\NapTab\UI\Tab>
+     */
     public function getTabsProperty(): Collection
     {
         return $this->getTabsCollection();
@@ -430,21 +468,24 @@ abstract class NapTab extends Component
     /**
      * Get navigation attributes for a specific tab
      */
+    /**
+     * @return array<string, mixed>
+     */
     public function getTabNavigationAttributes(string $tabId): array
     {
         return $this->navigationManager->getNavigationAttributes($tabId);
     }
 
     /**
-     * Get JavaScript code for navigation, hooks, and accessibility
+     * Get JavaScript code for navigation and accessibility
+     * Hooks are handled via Livewire events, not JavaScript
      */
     public function getNavigationJavaScript(): string
     {
         $navigationJs = $this->navigationManager->generateNavigationJavaScript();
-        $hooksJs = $this->hookManager->generateJavaScriptHooks();
         $accessibilityJs = $this->accessibilityManager->generateFocusManagementScript();
 
-        return $navigationJs . "\n" . $hooksJs . "\n" . $accessibilityJs;
+        return $navigationJs . "\n" . $accessibilityJs;
     }
 
     public function render(): View
@@ -469,7 +510,10 @@ abstract class NapTab extends Component
         ]);
     }
 
-    // JavaScript hooks for browser integration
+    // Livewire event listeners for browser integration
+    /**
+     * @return array<string, string>
+     */
     public function getListeners(): array
     {
         return [
@@ -478,6 +522,9 @@ abstract class NapTab extends Component
         ];
     }
 
+    /**
+     * @param array<string, mixed> $data
+     */
     public function handleBrowserNavigation(array $data): void
     {
         $tabFromUrl = $data['tab'] ?? '';

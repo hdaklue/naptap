@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Hdaklue\NapTab\UI;
 
 use Closure;
-use Hdaklu\NapTab\Services\NapTabConfig;
+use Hdaklue\NapTab\Services\NapTabConfig;
 use Illuminate\Contracts\Support\Htmlable;
 use InvalidArgumentException;
 use Livewire\Component;
@@ -14,34 +14,40 @@ use Livewire\Component;
  * Filament-style Tab configuration class with fluent API
  *
  * @property-read string $id
- * @property-read string $label
- * @property-read ?string $icon
- * @property-read ?string $badge
+ * @property-read string $label  
+ * @property-read string|null $icon
+ * @property-read string|null $badge
  * @property-read bool $disabled
- * @property-read Closure|Htmlable|null $content
- * @property-read ?string $livewireComponent
- * @property-read array $livewireParams
+ * @property-read \Closure|\Illuminate\Contracts\Support\Htmlable|null $content
+ * @property-read string|null $livewireComponent
+ * @property-read array<string, mixed> $livewireParams
  */
 class Tab extends Component
 {
     protected string $id;
-    protected Closure|string $label;
-    protected Closure|string|null $icon = null;
-    protected Closure|string|null $badge = null;
-    protected Closure|bool $disabled = false;
-    protected Closure|Htmlable|null $content = null;
-    protected Closure|string|null $livewireComponent = null;
-    protected Closure|array $livewireParams = [];
-    protected Closure|bool|null $visibility = null;
-    protected null|Closure $beforeLoadHook = null;
-    protected null|Closure $afterLoadHook = null;
-    protected null|Closure $onErrorHook = null;
-    protected null|Closure $onSwitchHook = null;
+    protected \Closure|string $label;
+    protected \Closure|string|null $icon = null;
+    protected \Closure|string|null $badge = null;
+    protected \Closure|bool $disabled = false;
+    protected \Closure|\Illuminate\Contracts\Support\Htmlable|null $content = null;
+    protected \Closure|string|null $livewireComponent = null;
+    /** @var \Closure|array<string, mixed> */
+    protected \Closure|array $livewireParams = [];
+    protected \Closure|bool|null $visibility = null;
+    protected \Closure|null $beforeLoadHook = null;
+    protected \Closure|null $afterLoadHook = null;
+    protected \Closure|null $onErrorHook = null;
+    protected \Closure|null $onSwitchHook = null;
 
     public function __construct(string $id)
     {
         if (empty(trim($id))) {
             throw new InvalidArgumentException('Tab ID cannot be empty');
+        }
+
+        // Enhanced validation: only allow safe characters for tab IDs
+        if (!preg_match('/^[a-zA-Z0-9_-]+$/', $id) || strlen($id) > 50) {
+            throw new InvalidArgumentException('Tab ID must contain only alphanumeric characters, hyphens, and underscores, and be no longer than 50 characters');
         }
 
         $this->id = $id;
@@ -53,38 +59,38 @@ class Tab extends Component
         return new self($id);
     }
 
-    public function label(Closure|string $label): self
+    public function label(\Closure|string $label): self
     {
         $this->label = $label;
         return $this;
     }
 
-    public function icon(Closure|string|null $icon): self
+    public function icon(\Closure|string|null $icon): self
     {
         $this->icon = $icon;
         return $this;
     }
 
-    public function badge(Closure|string|null $badge): self
+    public function badge(\Closure|string|null $badge): self
     {
         $this->badge = $badge;
         return $this;
     }
 
-    public function disabled(Closure|bool $disabled = true): self
+    public function disabled(\Closure|bool $disabled = true): self
     {
         $this->disabled = $disabled;
         return $this;
     }
 
 
-    public function visible(Closure|bool $visible): self
+    public function visible(\Closure|bool $visible): self
     {
         $this->visibility = $visible;
         return $this;
     }
 
-    public function content(Closure|Htmlable $content): self
+    public function content(\Closure|\Illuminate\Contracts\Support\Htmlable $content): self
     {
         if ($this->livewireComponent !== null) {
             throw new InvalidArgumentException('Cannot set both content closure and Livewire component');
@@ -94,7 +100,11 @@ class Tab extends Component
         return $this;
     }
 
-    public function livewire(Closure|string $component, Closure|array $params = []): self
+    /**
+     * @param \Closure|string $component
+     * @param \Closure|array<string, mixed> $params
+     */
+    public function livewire(\Closure|string $component, \Closure|array $params = []): self
     {
         if ($this->content !== null) {
             throw new InvalidArgumentException('Cannot set both content closure and Livewire component');
@@ -105,25 +115,25 @@ class Tab extends Component
         return $this;
     }
 
-    public function beforeLoad(Closure $hook): self
+    public function beforeLoad(\Closure $hook): self
     {
         $this->beforeLoadHook = $hook;
         return $this;
     }
 
-    public function afterLoad(Closure $hook): self
+    public function afterLoad(\Closure $hook): self
     {
         $this->afterLoadHook = $hook;
         return $this;
     }
 
-    public function onError(Closure $hook): self
+    public function onError(\Closure $hook): self
     {
         $this->onErrorHook = $hook;
         return $this;
     }
 
-    public function onSwitch(Closure $hook): self
+    public function onSwitch(\Closure $hook): self
     {
         $this->onSwitchHook = $hook;
         return $this;
@@ -170,7 +180,7 @@ class Tab extends Component
     }
 
 
-    public function getContent(): null|Closure
+    public function getContent(): \Closure|null
     {
         return $this->content;
     }
@@ -180,6 +190,9 @@ class Tab extends Component
         return $this->evaluate($this->livewireComponent);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getLivewireParams(): array
     {
         return $this->evaluate($this->livewireParams);
@@ -217,74 +230,113 @@ class Tab extends Component
 
     public function executeBeforeLoad(array $context = []): mixed
     {
-        // Dispatch JavaScript event
+        // Dispatch window event using Livewire 3's js() method
         $this->js("
             window.dispatchEvent(new CustomEvent('tab:beforeLoad', {
-                detail: { tabId: '{$this->id}', context: "
-        . json_encode($context)
-        . ' }
-            }))
-        ');
+                detail: {
+                    tabId: " . json_encode($this->id) . ",
+                    context: " . json_encode($context) . "
+                }
+            }));
+        ");
 
-        return $this->beforeLoadHook ? ($this->beforeLoadHook)($this, $context) : null;
+        $result = $this->beforeLoadHook ? ($this->beforeLoadHook)($this, $context) : null;
+        
+        // Log the hook execution for debugging
+        if (static::config()->get('debug', false)) {
+            \Illuminate\Support\Facades\Log::debug("Tab Hook Executed: beforeLoad", [
+                'tabId' => $this->id,
+                'context' => $context,
+                'result' => $result
+            ]);
+        }
+
+        return $result;
     }
 
     public function executeAfterLoad(string $content, array $context = []): mixed
     {
-        // Dispatch JavaScript event
+        // Dispatch window event using Livewire 3's js() method
         $this->js("
             window.dispatchEvent(new CustomEvent('tab:afterLoad', {
                 detail: {
-                    tabId: '{$this->id}',
-                    contentLength: "
-        . strlen($content)
-        . ',
-                    context: '
-        . json_encode($context)
-        . '
+                    tabId: " . json_encode($this->id) . ",
+                    contentLength: " . strlen($content) . ",
+                    context: " . json_encode($context) . "
                 }
-            }))
-        ');
+            }));
+        ");
 
-        return $this->afterLoadHook ? ($this->afterLoadHook)($this, $content, $context) : null;
+        $result = $this->afterLoadHook ? ($this->afterLoadHook)($this, $content, $context) : null;
+        
+        // Log the hook execution for debugging
+        if (static::config()->get('debug', false)) {
+            \Illuminate\Support\Facades\Log::debug("Tab Hook Executed: afterLoad", [
+                'tabId' => $this->id,
+                'contentLength' => strlen($content),
+                'context' => $context,
+                'result' => $result
+            ]);
+        }
+
+        return $result;
     }
 
     public function executeOnError(\Exception $error, array $context = []): mixed
     {
-        // Dispatch JavaScript event
+        // Dispatch window event using Livewire 3's js() method
         $this->js("
             window.dispatchEvent(new CustomEvent('tab:error', {
                 detail: {
-                    tabId: '{$this->id}',
-                    error: '"
-        . addslashes($error->getMessage())
-        . "',
-                    context: "
-        . json_encode($context)
-        . '
+                    tabId: " . json_encode($this->id) . ",
+                    error: " . json_encode($error->getMessage()) . ",
+                    context: " . json_encode($context) . "
                 }
-            }))
-        ');
+            }));
+        ");
 
-        return $this->onErrorHook ? ($this->onErrorHook)($this, $error, $context) : null;
+        $result = $this->onErrorHook ? ($this->onErrorHook)($this, $error, $context) : null;
+        
+        // Log the hook execution for debugging
+        if (static::config()->get('debug', false)) {
+            \Illuminate\Support\Facades\Log::debug("Tab Hook Executed: onError", [
+                'tabId' => $this->id,
+                'error' => $error->getMessage(),
+                'context' => $context,
+                'result' => $result
+            ]);
+        }
+
+        return $result;
     }
 
     public function executeOnSwitch(string $fromTabId, string $toTabId, array $context = []): mixed
     {
-        // Dispatch JavaScript event
+        // Dispatch window event using Livewire 3's js() method
         $this->js("
             window.dispatchEvent(new CustomEvent('tab:switch', {
                 detail: {
-                    fromTabId: '{$fromTabId}',
-                    toTabId: '{$toTabId}',
-                    context: "
-        . json_encode($context)
-        . '
+                    fromTabId: " . json_encode($fromTabId) . ",
+                    toTabId: " . json_encode($toTabId) . ",
+                    context: " . json_encode($context) . "
                 }
-            }))
-        ');
+            }));
+        ");
 
-        return $this->onSwitchHook ? ($this->onSwitchHook)($this, $fromTabId, $toTabId, $context) : null;
+        $result = $this->onSwitchHook ? ($this->onSwitchHook)($this, $fromTabId, $toTabId, $context) : null;
+        
+        // Log the hook execution for debugging
+        if (static::config()->get('debug', false)) {
+            \Illuminate\Support\Facades\Log::debug("Tab Hook Executed: onSwitch", [
+                'tabId' => $this->id,
+                'fromTabId' => $fromTabId,
+                'toTabId' => $toTabId,
+                'context' => $context,
+                'result' => $result
+            ]);
+        }
+
+        return $result;
     }
 
     public function renderContent(): string
@@ -307,6 +359,9 @@ class Tab extends Component
         return '';
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         return [
@@ -352,19 +407,27 @@ class Tab extends Component
         $this->dispatch("tab:{$event}", array_merge(['tabId' => $this->id], $data));
     }
 
-    /**
-     * Execute JavaScript for this tab with access to $this->js()
-     */
-    public function executeJs(string $js): void
-    {
-        $this->js($js);
-    }
 
     /**
      * Redirect with Livewire navigation for this tab
      */
     public function navigateToTab(string $url): void
     {
+        // Validate URL to prevent open redirect vulnerabilities
+        if (!filter_var($url, FILTER_VALIDATE_URL) && !str_starts_with($url, '/')) {
+            throw new InvalidArgumentException('Invalid URL provided for navigation');
+        }
+
+        // Prevent external redirects for security
+        if (filter_var($url, FILTER_VALIDATE_URL)) {
+            $parsedUrl = parse_url($url);
+            $currentHost = request()->getHost();
+            
+            if (isset($parsedUrl['host']) && $parsedUrl['host'] !== $currentHost) {
+                throw new InvalidArgumentException('External redirects are not allowed');
+            }
+        }
+
         $this->redirect($url, navigate: true);
     }
 

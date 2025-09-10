@@ -187,6 +187,7 @@ abstract class NapTab extends Component
 
     /**
      * Handle component synchronization after route navigation
+     * This is crucial for wire:navigate and browser back button support
      */
     public function hydrate(): void
     {
@@ -195,14 +196,29 @@ abstract class NapTab extends Component
             $routeActiveTab = $this->getCurrentActiveTab();
             
             if ($routeActiveTab !== $this->activeTab) {
+                $oldTab = $this->activeTab;
                 $this->activeTab = $routeActiveTab;
+                
+                // Ensure the new tab is loaded for immediate display
                 $this->markTabAsLoaded($routeActiveTab);
                 
-                // Dispatch tab changed event for consistency
+                // Dispatch tab changed event for frontend synchronization
                 $this->dispatch('tab-changed', [
-                    'oldTab' => $this->activeTab,
-                    'newTab' => $routeActiveTab
+                    'oldTab' => $oldTab,
+                    'newTab' => $routeActiveTab,
+                    'source' => 'navigation' // Indicate this came from browser navigation
                 ]);
+                
+                // Dispatch window event for browser integration
+                $this->js("
+                    window.dispatchEvent(new CustomEvent('tab:navigationChanged', {
+                        detail: {
+                            oldTab: " . json_encode($oldTab) . ",
+                            newTab: " . json_encode($routeActiveTab) . ",
+                            source: 'wire-navigate'
+                        }
+                    }));
+                ");
             }
         }
     }
@@ -523,6 +539,7 @@ abstract class NapTab extends Component
     }
 
     /**
+     * Handle browser navigation events (for cases where wire:navigate isn't used)
      * @param array<string, mixed> $data
      */
     public function handleBrowserNavigation(array $data): void
@@ -530,7 +547,30 @@ abstract class NapTab extends Component
         $tabFromUrl = $data['tab'] ?? '';
 
         if ($tabFromUrl && $this->getTabsCollection()->has($tabFromUrl)) {
-            $this->switchTab($tabFromUrl);
+            $tab = $this->getTabsCollection()->get($tabFromUrl);
+            
+            // Check authorization before switching
+            if ($tab->canAccess()) {
+                // For wire:navigate enabled components, prefer URL redirect
+                if ($this->wireNavigate && $this->config->isRoutable()) {
+                    $currentRoute = request()->route();
+                    if ($currentRoute) {
+                        $routeParams = $currentRoute->parameters();
+                        $routeParams['activeTab'] = $tabFromUrl;
+                        
+                        try {
+                            $url = route($currentRoute->getName(), $routeParams);
+                            $this->redirect($url, navigate: true);
+                            return;
+                        } catch (\Exception $e) {
+                            // Fall back to direct tab switching
+                        }
+                    }
+                }
+                
+                // Direct tab switching as fallback
+                $this->switchTab($tabFromUrl);
+            }
         }
     }
 

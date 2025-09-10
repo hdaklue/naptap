@@ -57,6 +57,9 @@
         if ($currentStyle === 'minimal') {
             // MINIMAL: Clean border-only style with primary color text/icons
             $activeClasses = 'border-0 text-' . $primaryColor . '-600 dark:text-' . $primaryColor . '-400 font-semibold';
+        } elseif ($currentStyle === 'pills') {
+            // PILLS: Full border with primary color border and background
+            $activeClasses = $borderWidth . ' border-' . $primaryColor . '-500 dark:border-' . $primaryColor . '-400 text-' . $primaryColor . '-700 dark:text-' . $primaryColor . '-300 font-semibold bg-' . $primaryColor . '-50/80 dark:bg-' . $primaryColor . '-900/30';
         } else {
             // MODERN/SHARP: Rich gradient background
             $activeClasses = 'border-0 text-' . $primaryColor . '-700 dark:text-' . $primaryColor . '-300 font-semibold bg-gradient-to-t from-' . $primaryColor . '-50/80 to-transparent dark:from-' . $primaryColor . '-900/30';
@@ -70,8 +73,14 @@
             }
         }
 
-        // Inactive tab classes
-        $inactiveClasses = $borderWidth . ' border-transparent text-' . $secondaryColor . '-600 dark:text-' . $secondaryColor . '-400 hover:text-' . $secondaryColor . '-900 dark:hover:text-white hover:border-' . $secondaryColor . '-300 dark:hover:border-' . $secondaryColor . '-600 hover:bg-gradient-to-t hover:from-' . $secondaryColor . '-50/80 hover:to-transparent dark:hover:from-' . $secondaryColor . '-800/50';
+        // Inactive tab classes - handle different styles
+        if ($currentStyle === 'pills') {
+            // PILLS: Full border with subtle background
+            $inactiveClasses = $borderWidth . ' border-' . $secondaryColor . '-300 dark:border-' . $secondaryColor . '-600 text-' . $secondaryColor . '-600 dark:text-' . $secondaryColor . '-400 hover:text-' . $secondaryColor . '-900 dark:hover:text-white hover:border-' . $secondaryColor . '-400 dark:hover:border-' . $secondaryColor . '-500 hover:bg-' . $secondaryColor . '-50/80 dark:hover:bg-' . $secondaryColor . '-800/50';
+        } else {
+            // MINIMAL/MODERN/SHARP: Bottom border style
+            $inactiveClasses = $borderWidth . ' border-transparent text-' . $secondaryColor . '-600 dark:text-' . $secondaryColor . '-400 hover:text-' . $secondaryColor . '-900 dark:hover:text-white hover:border-' . $secondaryColor . '-300 dark:hover:border-' . $secondaryColor . '-600 hover:bg-gradient-to-t hover:from-' . $secondaryColor . '-50/80 hover:to-transparent dark:hover:from-' . $secondaryColor . '-800/50';
+        }
 
         // Apply hover shadows to inactive tabs when enabled
         if ($shadowEnabled && !empty($hoverShadow) && $hoverShadow !== 'shadow-none') {
@@ -87,7 +96,7 @@
     @else
         <button type="button" wire:click="switchTab('{{ $tab->getId() }}')" wire:key="tab-btn-{{ $tab->getId() }}"
     @endif
-        class="{{ $isActive ? $activeClasses : $inactiveClasses }} {{ $tab->isDisabled() ? 'opacity-40 cursor-not-allowed pointer-events-none grayscale' : ($isActive ? 'cursor-default tab-active-premium' : 'cursor-pointer tab-hover-simple') }} {{ $spacing['tab_padding'] }} {{ $transitionDuration }} {{ $transitionTiming }} tab-button {{ $borderRadius }} group relative flex-shrink-0 overflow-hidden whitespace-nowrap text-sm font-medium transition-all focus:outline-none" 
+        class="{{ $isActive ? $activeClasses : $inactiveClasses }} {{ $tab->isDisabled() ? 'opacity-40 cursor-not-allowed pointer-events-none grayscale' : ($isActive ? 'cursor-default' . ($currentStyle !== 'pills' ? ' tab-active-premium' : '') : 'cursor-pointer tab-hover-simple') }} {{ $spacing['tab_padding'] }} {{ $transitionDuration }} {{ $transitionTiming }} tab-button {{ $borderRadius }} group relative flex-shrink-0 overflow-hidden whitespace-nowrap text-sm font-medium transition-all focus:outline-none" 
         id="tab-{{ $tab->getId() }}" 
         role="tab" 
         aria-selected="{{ $isActive ? 'true' : 'false' }}" 

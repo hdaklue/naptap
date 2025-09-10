@@ -29,7 +29,7 @@ Perfect Arabic language support with automatic text direction detection.
 SEO-friendly bookmarkable tabs with automatic {activeTab?} parameter handling.
 
 ### 🎨 **Professional Theming**
-22 color schemes with dark/light mode support and 3 visual presets (Modern, Minimal, Sharp).
+22 color schemes with dark/light mode support and 4 visual presets (Modern, Minimal, Sharp, Pills).
 
 ### 🔧 **Package Integration**
 Seamlessly integrates with any Laravel package - FilamentPHP admin panels, custom Livewire components, or traditional Blade views.
@@ -47,6 +47,7 @@ Seamlessly integrates with any Laravel package - FilamentPHP admin panels, custo
 - ✅ Efficient DOM management with strategic Livewire keys
 - ✅ Smart route parameter handling without full page reloads
 - ✅ Optimized for mobile with minimal JavaScript overhead
+- ✅ Configuration caching - theme settings cached for optimal performance
 
 ## Quick Start
 
@@ -364,7 +365,7 @@ class NapTabServiceProvider extends ServiceProvider
         $this->app->singleton('naptab.config', function () {
             return NapTabConfig::create()
                 // Preset styles - applies multiple settings at once
-                ->style(TabStyle::Modern)                    // Modern | Minimal | Sharp
+                ->style(TabStyle::Modern)                    // Modern | Minimal | Sharp | Pills
                 
                 // Visual customization
                 ->color(TabColor::Blue, TabColor::Gray)      // Primary & secondary colors
@@ -401,7 +402,7 @@ class NapTabServiceProvider extends ServiceProvider
 **Core Configuration**
 ```php
 NapTabConfig::create()                              // Create new config instance
-    ->style(TabStyle $style)                        // Modern | Minimal | Sharp preset
+    ->style(TabStyle $style)                        // Modern | Minimal | Sharp | Pills preset
     ->color(TabColor $primary, TabColor $secondary) // Theme colors  
     ->radius(TabBorderRadius $radius)               // Border radius
     ->shadow(Shadow $shadow, ?string $color)        // Shadow size and custom color
@@ -443,6 +444,54 @@ Each preset applies multiple settings for a cohesive design:
 ```php
 ->style(TabStyle::Sharp) 
 // Bold geometric design with no shadows, no borders, no rounded corners
+```
+
+**Pills Style**
+```php
+->style(TabStyle::Pills)
+// Modern pill-shaped tabs with full borders, rounded corners, and no container underline
+```
+
+## Configuration Caching
+
+NapTab automatically caches configuration settings for optimal performance in production environments.
+
+### How Caching Works
+
+- **Singleton Pattern**: Configuration is resolved once per request and cached in memory
+- **Array Conversion**: The expensive `toArray()` conversion is optimized to avoid repeated computation
+- **Production Ready**: Zero configuration impact on high-traffic applications
+
+### Performance Benefits
+
+- **Faster Rendering**: Tab components render instantly without config overhead
+- **Memory Efficient**: Configuration objects are reused across multiple tab instances
+- **Scalable**: No performance degradation as you add more tab components
+
+### Cache Management
+
+The configuration cache is automatically managed:
+
+```php
+// Configuration is cached as singleton in service container
+$this->app->singleton('naptab.config', function () {
+    return NapTabConfig::create()->style(TabStyle::Pills);
+});
+```
+
+### Clearing Cache (Development)
+
+If you modify your configuration during development:
+
+```bash
+# Clear application cache
+php artisan cache:clear
+
+# Clear config cache (if using config:cache)
+php artisan config:clear
+
+# Restart development server
+php artisan serve
 ```
 
 ## Installation Guide

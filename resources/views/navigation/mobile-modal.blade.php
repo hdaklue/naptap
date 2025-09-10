@@ -13,7 +13,7 @@
         class="w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-{{ $secondaryColor }}-800 border border-{{ $secondaryColor }}-300 dark:border-{{ $secondaryColor }}-600 rounded-lg {{ $shadowEnabled ? 'shadow-sm' : '' }} hover:bg-{{ $secondaryColor }}-50 dark:hover:bg-{{ $secondaryColor }}-700 transition-all duration-200 active:scale-[0.98]">
         
         {{-- Active tab content --}}
-        <div class="flex items-center space-x-3 min-w-0 flex-1">
+        <div class="flex items-center gap-3 min-w-0 flex-1">
             @foreach($tabs as $tab)
                 @if($activeTab === $tab->getId())
                     {{-- Tab icon --}}
@@ -24,7 +24,7 @@
                     @endif
                     
                     {{-- Tab label and badge --}}
-                    <div class="min-w-0 flex-1 flex items-center space-x-2">
+                    <div class="min-w-0 flex-1 flex items-center gap-2">
                         <span class="font-medium text-{{ $primaryColor }}-900 dark:text-{{ $primaryColor }}-100 truncate">
                             {{ $tab->getLabel() }}
                         </span>
@@ -40,7 +40,7 @@
         </div>
         
         {{-- Hamburger menu icon --}}
-        <div class="flex-shrink-0 ml-3">
+        <div class="flex-shrink-0 ms-3">
             <svg class="w-5 h-5 text-{{ $secondaryColor }}-500 dark:text-{{ $secondaryColor }}-400 transition-transform duration-200" 
                  :class="modalOpen ? 'rotate-90' : ''" 
                  fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -70,13 +70,13 @@
             
             {{-- Modal Header --}}
             <div class="flex items-center justify-between p-4 border-b border-{{ $secondaryColor }}-200 dark:border-{{ $secondaryColor }}-700">
-                <div class="flex items-center space-x-2">
+                <div class="flex items-center gap-2">
                     <svg class="w-5 h-5 text-{{ $secondaryColor }}-500 dark:text-{{ $secondaryColor }}-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                     </svg>
                     <h2 class="text-lg font-semibold text-{{ $secondaryColor }}-900 dark:text-{{ $secondaryColor }}-100">
                         Select Tab
-                        <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-{{ $secondaryColor }}-100 text-{{ $secondaryColor }}-800 dark:bg-{{ $secondaryColor }}-700 dark:text-{{ $secondaryColor }}-200">
+                        <span class="ms-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-{{ $secondaryColor }}-100 text-{{ $secondaryColor }}-800 dark:bg-{{ $secondaryColor }}-700 dark:text-{{ $secondaryColor }}-200">
                             {{ count($tabs) }}
                         </span>
                     </h2>
@@ -127,7 +127,7 @@
                         <button type="button" wire:click="switchTab('{{ $tab->getId() }}')"
                     @endif
                         x-on:click="modalOpen = false; document.body.style.overflow = ''"
-                        class="w-full flex items-center space-x-3 px-4 py-4 text-left hover:bg-{{ $secondaryColor }}-50 dark:hover:bg-{{ $secondaryColor }}-800 transition-colors {{ $isActive ? 'bg-' . $primaryColor . '-50 dark:bg-' . $primaryColor . '-900/20 border-r-2 border-' . $primaryColor . '-500' : '' }}"
+                        class="w-full flex items-center gap-3 px-4 py-4 text-start hover:bg-{{ $secondaryColor }}-50 dark:hover:bg-{{ $secondaryColor }}-800 transition-colors {{ $isActive ? 'bg-' . $primaryColor . '-50 dark:bg-' . $primaryColor . '-900/20 border-e-2 border-' . $primaryColor . '-500' : '' }}"
                         {{ $tab->isDisabled() ? 'disabled' : '' }}>
                         
                         {{-- Tab icon --}}
@@ -148,7 +148,7 @@
                             
                             {{-- Badge --}}
                             @if($tab->getBadge())
-                                <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $isActive ? 'bg-' . $primaryColor . '-100 text-' . $primaryColor . '-800 dark:bg-' . $primaryColor . '-800 dark:text-' . $primaryColor . '-200' : 'bg-' . $secondaryColor . '-100 text-' . $secondaryColor . '-800 dark:bg-' . $secondaryColor . '-700 dark:text-' . $secondaryColor . '-200' }} flex-shrink-0">
+                                <span class="ms-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $isActive ? 'bg-' . $primaryColor . '-100 text-' . $primaryColor . '-800 dark:bg-' . $primaryColor . '-800 dark:text-' . $primaryColor . '-200' : 'bg-' . $secondaryColor . '-100 text-' . $secondaryColor . '-800 dark:bg-' . $secondaryColor . '-700 dark:text-' . $secondaryColor . '-200' }} flex-shrink-0">
                                     {{ $tab->getBadge() }}
                                 </span>
                             @endif

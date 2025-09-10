@@ -49,6 +49,12 @@
 @source inline("{hover:,dark:,dark:hover:}text-fuchsia-{100,200,300,400,500,600,700,800,900}");
 @source inline("{hover:,dark:,dark:hover:}text-rose-{100,200,300,400,500,600,700,800,900}");
 
+/* Border width utilities for pills style */
+@source inline("border border-2 border-b border-b-2 border-b-4 border-b-8 border-b-0");
+
+/* RTL utilities for proper spacing and alignment */
+@source inline("ms-2 ms-3 me-2 me-3 text-start text-end border-e-2 gap-2 gap-3");
+
 /* Border colors for all supported theme colors */
 @source inline("{hover:,dark:,dark:hover:}border-blue-{200,300,400,500,600,700}");
 @source inline("{hover:,dark:,dark:hover:}border-red-{200,300,400,500,600,700}");

@@ -11,7 +11,7 @@
         $isDesktop = $agent->isDesktop() || (!$isMobile && !$isTablet);
     @endphp
     
-    <div class="border-b border-gray-200 dark:border-gray-700">
+    <div class="{{ ($styles['borders']['container_bottom_border'] ?? true) ? 'border-b border-gray-200 dark:border-gray-700' : '' }}">
         {{-- Device-Specific Navigation --}}
         @if($isMobile && $useModalOnMobile)
             @include('naptab::navigation.mobile-modal', ['tabs' => $tabs, 'activeTab' => $activeTab, 'styles' => $styles, 'spacing' => $spacing])

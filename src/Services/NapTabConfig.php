@@ -41,6 +41,7 @@ class NapTabConfig
     protected ContentAnimation $contentAnimation = ContentAnimation::Fade;
     protected bool $mobileModalNavigation = false;
     protected bool $routableEnabled = true;
+    protected bool $containerBottomBorder = true;
     protected null|TabStyle $currentStyle = null;
 
     public static function create(): self
@@ -135,6 +136,17 @@ class NapTabConfig
             ->badgeSize(BadgeSize::Medium); // Medium badges for sharp look
     }
 
+    public function pills(): self
+    {
+        return $this->shadow(Shadow::None) // No shadows for clean look
+            ->border(TabBorderWidth::FullThin, false) // Full thin border around each pill
+            ->transition(TabTransition::Duration200)
+            ->spacing(TabSpacing::Small)
+            ->radius(TabBorderRadius::Full) // Full radius for pill shape
+            ->badgeSize(BadgeSize::Small) // Small badges for clean pill look
+            ->containerBorder(false); // No container bottom border for clean pill design
+    }
+
     // Convert to array for template usage
     public function toArray(): array
     {
@@ -160,6 +172,7 @@ class NapTabConfig
                 'borders' => [
                     'double_border' => $this->doubleBorder,
                     'border_width' => $this->borderWidth->value,
+                    'container_bottom_border' => $this->containerBottomBorder,
                 ],
                 'transitions' => [
                     'duration' => $this->transitionDuration->value,
@@ -249,5 +262,11 @@ class NapTabConfig
     public function isRoutable(): bool
     {
         return $this->routableEnabled;
+    }
+
+    public function containerBorder(bool $enabled = true): self
+    {
+        $this->containerBottomBorder = $enabled;
+        return $this;
     }
 }

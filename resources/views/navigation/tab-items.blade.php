@@ -130,8 +130,8 @@
                     $badgeRadius = $styles['badge_radius'];
                     $badgeSize = $styles['badge_size'];
                     
-                    $activeBadgeClasses = 'bg-' . $primaryColor . '-100 text-' . $primaryColor . '-800 ring-' . $primaryColor . '-200 dark:bg-' . $primaryColor . '-900/30 dark:text-' . $primaryColor . '-300 dark:ring-' . $primaryColor . '-700/50';
-                    $inactiveBadgeClasses = 'bg-' . $secondaryColor . '-100 text-' . $secondaryColor . '-800 ring-' . $secondaryColor . '-200 dark:bg-' . $secondaryColor . '-800/30 dark:text-' . $secondaryColor . '-300 dark:ring-' . $secondaryColor . '-700/50';
+                    $activeBadgeClasses = 'bg-' . $primaryColor . '-200/70 text-' . $primaryColor . '-900 ring-' . $primaryColor . '-300/50 dark:bg-' . $primaryColor . '-900/30 dark:text-' . $primaryColor . '-300 dark:ring-' . $primaryColor . '-700/50';
+                    $inactiveBadgeClasses = 'bg-' . $secondaryColor . '-200/60 text-' . $secondaryColor . '-900 ring-' . $secondaryColor . '-300/40 dark:bg-' . $secondaryColor . '-800/30 dark:text-' . $secondaryColor . '-300 dark:ring-' . $secondaryColor . '-700/50';
 
                     if ($shadowEnabled) {
                         $activeBadgeClasses .= ' shadow-sm shadow-' . $primaryColor . '-500/15 dark:shadow-' . $primaryColor . '-400/20';

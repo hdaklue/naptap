@@ -114,6 +114,7 @@ abstract class NapTab extends Component
 
     /**
      * Get the NapTab configuration instance
+     * Override this method in your component to provide custom configuration
      */
     public function config(): NapTabConfig
     {
@@ -528,7 +529,7 @@ abstract class NapTab extends Component
 
     public function render(): View
     {
-        $config = $this->config->toArray();
+        $config = $this->config()->toArray();
         $currentActiveTab = $this->getCurrentActiveTab();
         
         // Update activeTab if it changed via route

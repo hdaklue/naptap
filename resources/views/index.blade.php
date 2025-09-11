@@ -1,4 +1,14 @@
-<div class="nap-tab-container w-full flex {{ $direction->containerClasses() }} {{ $direction->responsiveClasses() }}" role="tabpanel" aria-label="Tabs interface">
+<div class="nap-tabs-wrapper w-full">
+    {{-- Before Content (justified start) --}}
+    @if($this->hasBeforeContent())
+        <div class="flex justify-start mb-4">
+            <div class="before-tabs-content">
+                {!! $this->renderBeforeContent() !!}
+            </div>
+        </div>
+    @endif
+
+    <div class="nap-tab-container w-full flex {{ $direction->containerClasses() }} {{ $direction->responsiveClasses() }}" role="tabpanel" aria-label="Tabs interface">
     {{-- Tab Navigation with Device Detection --}}
     @php
         $agent = app('agent');
@@ -185,4 +195,14 @@
             }
         }
     </style>
+</div>
+
+    {{-- After Content (justified end) --}}
+    @if($this->hasAfterContent())
+        <div class="flex justify-end mt-4">
+            <div class="after-tabs-content">
+                {!! $this->renderAfterContent() !!}
+            </div>
+        </div>
+    @endif
 </div>

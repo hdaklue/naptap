@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Hdaklue\NapTab\Livewire;
 
+use Closure;
 use Hdaklue\NapTab\Enums\Direction;
 use Hdaklue\NapTab\Services\NapTabConfig;
 use Hdaklue\NapTab\Services\TabsAccessibilityManager;
@@ -11,6 +12,7 @@ use Hdaklue\NapTab\Services\TabsHookManager;
 use Hdaklue\NapTab\Services\TabsLayoutManager;
 use Hdaklue\NapTab\Services\TabsNavigationManager;
 use Hdaklue\NapTab\UI\Tab;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
 use Livewire\Component;
@@ -35,6 +37,8 @@ abstract class NapTab extends Component
     protected TabsLayoutManager $layoutManager;
     protected TabsAccessibilityManager $accessibilityManager;
     protected NapTabConfig $config;
+    protected Closure|string|Htmlable|null $beforeContent = null;
+    protected Closure|string|Htmlable|null $afterContent = null;
 
     /**
      * @return array<\Hdaklue\NapTab\UI\Tab>
@@ -57,6 +61,86 @@ abstract class NapTab extends Component
     protected function direction(): Direction
     {
         return Direction::Horizontal; // Default: horizontal layout
+    }
+
+    /**
+     * Set content to render before the tabs container
+     */
+    protected function beforeContent(Closure|string|Htmlable $content): void
+    {
+        $this->beforeContent = $content;
+    }
+
+    /**
+     * Set content to render after the tabs container
+     */
+    protected function afterContent(Closure|string|Htmlable $content): void
+    {
+        $this->afterContent = $content;
+    }
+
+    /**
+     * Check if beforeContent is set
+     */
+    public function hasBeforeContent(): bool
+    {
+        return $this->beforeContent !== null;
+    }
+
+    /**
+     * Check if afterContent is set
+     */
+    public function hasAfterContent(): bool
+    {
+        return $this->afterContent !== null;
+    }
+
+    /**
+     * Render the beforeContent
+     */
+    public function renderBeforeContent(): string
+    {
+        if ($this->beforeContent === null) {
+            return '';
+        }
+
+        return $this->renderContentValue($this->beforeContent);
+    }
+
+    /**
+     * Render the afterContent
+     */
+    public function renderAfterContent(): string
+    {
+        if ($this->afterContent === null) {
+            return '';
+        }
+
+        return $this->renderContentValue($this->afterContent);
+    }
+
+    /**
+     * Helper method to render content value (string, Htmlable, or Closure)
+     */
+    private function renderContentValue(mixed $content): string
+    {
+        // Handle Htmlable objects
+        if ($content instanceof Htmlable) {
+            return $content->toHtml();
+        }
+
+        // Handle Closure callables
+        if ($content instanceof Closure) {
+            $result = $content();
+            return is_string($result) ? $result : '';
+        }
+
+        // Handle string values
+        if (is_string($content)) {
+            return $content;
+        }
+
+        return '';
     }
 
     /**

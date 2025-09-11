@@ -1,12 +1,12 @@
-<div class="nap-tab-container w-full flex {{ $direction->containerClasses() }} {{ $direction->responsiveClasses() }}" role="tabpanel" aria-label="Tabs interface">
-    {{-- Before Content (respects direction) --}}
+<div class="nap-tabs-wrapper w-full">
+    {{-- Before Content (separate container) --}}
     @if($this->hasBeforeContent())
-        <div class="before-tabs-content {{ $direction === \Hdaklue\NapTab\Enums\Direction::Aside ? 'order-first' : '' }} {{ $direction->contentClasses() }}">
-            <div class="flex justify-start {{ $direction === \Hdaklue\NapTab\Enums\Direction::Aside ? 'mb-4' : 'mb-4' }}">
-                {!! $this->renderBeforeContent() !!}
-            </div>
+        <div class="before-tabs-content mb-4">
+            {!! $this->renderBeforeContent() !!}
         </div>
     @endif
+
+    <div class="nap-tab-container w-full flex {{ $direction->containerClasses() }} {{ $direction->responsiveClasses() }}" role="tabpanel" aria-label="Tabs interface">
     {{-- Tab Navigation with Device Detection --}}
     @php
         $agent = app('agent');
@@ -47,7 +47,7 @@
         </div>
 
         {{-- Tab content --}}
-        <div class="nap-tab-content w-full p-4 transition-opacity duration-200 ease-in-out"
+        <div class="nap-tab-content w-full p-4 flex flex-col transition-opacity duration-200 ease-in-out"
             wire:key="tab-panel-{{ $activeTab }}"
             wire:loading.class="opacity-30" wire:target="switchTab" id="tabpanel-{{ $activeTab }}" role="tabpanel"
             aria-labelledby="tab-{{ $activeTab }}" tabindex="0">
@@ -69,13 +69,12 @@
             @endif
         </div>
     </div>
+</div>
 
-    {{-- After Content (respects direction) --}}
+    {{-- After Content (separate container) --}}
     @if($this->hasAfterContent())
-        <div class="after-tabs-content {{ $direction === \Hdaklue\NapTab\Enums\Direction::Aside ? 'order-last' : '' }} {{ $direction->contentClasses() }}">
-            <div class="flex justify-end {{ $direction === \Hdaklue\NapTab\Enums\Direction::Aside ? 'mt-4' : 'mt-4' }}">
-                {!! $this->renderAfterContent() !!}
-            </div>
+        <div class="after-tabs-content mt-4">
+            {!! $this->renderAfterContent() !!}
         </div>
     @endif
 
@@ -202,4 +201,5 @@
             }
         }
     </style>
+</div>
 </div>

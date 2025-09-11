@@ -25,7 +25,7 @@ class NapTabConfig
     protected TabColor $secondaryColor = TabColor::Gray;
     protected TabBorderRadius $borderRadius = TabBorderRadius::Medium;
     protected TabBorderRadius $badgeRadius = TabBorderRadius::Full;
-    protected BadgeSize $badgeSize = BadgeSize::Medium;
+    protected BadgeSize $badgeSize = BadgeSize::Small;
     protected bool $shadowsEnabled = false;
     protected Shadow $shadow = Shadow::Large;
     protected string $shadowColor = 'shadow-blue-500/20 dark:shadow-blue-400/30';

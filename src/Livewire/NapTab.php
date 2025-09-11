@@ -37,8 +37,6 @@ abstract class NapTab extends Component
     protected TabsLayoutManager $layoutManager;
     protected TabsAccessibilityManager $accessibilityManager;
     protected NapTabConfig $config;
-    protected Closure|string|Htmlable|null $beforeContent = null;
-    protected Closure|string|Htmlable|null $afterContent = null;
 
     /**
      * @return array<\Hdaklue\NapTab\UI\Tab>
@@ -64,19 +62,19 @@ abstract class NapTab extends Component
     }
 
     /**
-     * Set content to render before the tabs container
+     * Override this method to set content to render before the tabs container
      */
-    protected function beforeContent(Closure|string|Htmlable $content): void
+    public function beforeContent(): null|string|Htmlable|View|Closure
     {
-        $this->beforeContent = $content;
+        return null;
     }
 
     /**
-     * Set content to render after the tabs container
+     * Override this method to set content to render after the tabs container
      */
-    protected function afterContent(Closure|string|Htmlable $content): void
+    public function afterContent(): null|string|Htmlable|View|Closure
     {
-        $this->afterContent = $content;
+        return null;
     }
 
     /**
@@ -84,7 +82,7 @@ abstract class NapTab extends Component
      */
     public function hasBeforeContent(): bool
     {
-        return $this->beforeContent !== null;
+        return $this->beforeContent() !== null;
     }
 
     /**
@@ -92,7 +90,7 @@ abstract class NapTab extends Component
      */
     public function hasAfterContent(): bool
     {
-        return $this->afterContent !== null;
+        return $this->afterContent() !== null;
     }
 
     /**
@@ -100,11 +98,12 @@ abstract class NapTab extends Component
      */
     public function renderBeforeContent(): string
     {
-        if ($this->beforeContent === null) {
+        $content = $this->beforeContent();
+        if ($content === null) {
             return '';
         }
 
-        return $this->renderContentValue($this->beforeContent);
+        return $this->renderContentValue($content);
     }
 
     /**
@@ -112,18 +111,24 @@ abstract class NapTab extends Component
      */
     public function renderAfterContent(): string
     {
-        if ($this->afterContent === null) {
+        $content = $this->afterContent();
+        if ($content === null) {
             return '';
         }
 
-        return $this->renderContentValue($this->afterContent);
+        return $this->renderContentValue($content);
     }
 
     /**
-     * Helper method to render content value (string, Htmlable, or Closure)
+     * Helper method to render content value (string, Htmlable, View, or Closure)
      */
     private function renderContentValue(mixed $content): string
     {
+        // Handle View objects
+        if ($content instanceof View) {
+            return $content->render();
+        }
+
         // Handle Htmlable objects
         if ($content instanceof Htmlable) {
             return $content->toHtml();

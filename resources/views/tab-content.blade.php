@@ -58,12 +58,10 @@
     {{-- Content State --}}
     @else
         <div wire:key="tab-inner-{{ $tab->getId() }}" x-ref="tab-content-{{ $tab->getId() }}" class="flex flex-col min-h-full">
-            {{-- Before Content (justified start) --}}
+            {{-- Before Content (contained) --}}
             @if($tab->hasBeforeContent())
-                <div class="flex justify-start mb-4">
-                    <div class="before-content">
-                        {!! $tab->renderBeforeContent() !!}
-                    </div>
+                <div class="mb-4">
+                    {!! $tab->renderBeforeContent() !!}
                 </div>
             @endif
 
@@ -93,12 +91,10 @@
                 @endif
             </div>
 
-            {{-- After Content (justified end) --}}
+            {{-- After Content (contained) --}}
             @if($tab->hasAfterContent())
-                <div class="flex justify-end mt-4">
-                    <div class="after-content">
-                        {!! $tab->renderAfterContent() !!}
-                    </div>
+                <div class="mt-4">
+                    {!! $tab->renderAfterContent() !!}
                 </div>
             @endif
         </div>

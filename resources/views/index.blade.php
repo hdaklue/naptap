@@ -39,7 +39,7 @@
         </div>
 
         {{-- Tab content --}}
-        <div class="nap-tab-content w-full transition-opacity duration-200 ease-in-out"
+        <div class="nap-tab-content w-full p-4 transition-opacity duration-200 ease-in-out"
             wire:key="tab-panel-{{ $activeTab }}"
             wire:loading.class="opacity-30" wire:target="switchTab" id="tabpanel-{{ $activeTab }}" role="tabpanel"
             aria-labelledby="tab-{{ $activeTab }}" tabindex="0">

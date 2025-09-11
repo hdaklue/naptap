@@ -39,6 +39,8 @@ class Tab extends Component
     protected Closure|null $afterLoadHook = null;
     protected Closure|null $onErrorHook = null;
     protected Closure|null $onSwitchHook = null;
+    protected Closure|string|Htmlable|null $beforeContent = null;
+    protected Closure|string|Htmlable|null $afterContent = null;
 
     /**
      * @throws InvalidArgumentException When tab ID is empty or contains invalid characters
@@ -148,6 +150,18 @@ class Tab extends Component
         return $this;
     }
 
+    public function beforeContent(Closure|string|Htmlable $content): self
+    {
+        $this->beforeContent = $content;
+        return $this;
+    }
+
+    public function afterContent(Closure|string|Htmlable $content): self
+    {
+        $this->afterContent = $content;
+        return $this;
+    }
+
     public function getId(): string
     {
         return $this->id;
@@ -236,6 +250,16 @@ class Tab extends Component
         return $this->onSwitchHook !== null;
     }
 
+    public function hasBeforeContent(): bool
+    {
+        return $this->beforeContent !== null;
+    }
+
+    public function hasAfterContent(): bool
+    {
+        return $this->afterContent !== null;
+    }
+
     public function executeBeforeLoad(): mixed
     {
         return $this->beforeLoadHook ? ($this->beforeLoadHook)($this) : null;
@@ -271,6 +295,45 @@ class Tab extends Component
         if ($this->content instanceof Closure) {
             $result = ($this->content)();
             return is_string($result) ? $result : '';
+        }
+
+        return '';
+    }
+
+    public function renderBeforeContent(): string
+    {
+        if ($this->beforeContent === null) {
+            return '';
+        }
+
+        return $this->renderContentValue($this->beforeContent);
+    }
+
+    public function renderAfterContent(): string
+    {
+        if ($this->afterContent === null) {
+            return '';
+        }
+
+        return $this->renderContentValue($this->afterContent);
+    }
+
+    private function renderContentValue(mixed $content): string
+    {
+        // Handle Htmlable objects
+        if ($content instanceof Htmlable) {
+            return $content->toHtml();
+        }
+
+        // Handle Closure callables
+        if ($content instanceof Closure) {
+            $result = $this->evaluate($content);
+            return is_string($result) ? $result : '';
+        }
+
+        // Handle string values
+        if (is_string($content)) {
+            return $content;
         }
 
         return '';

@@ -238,3 +238,77 @@ describe('Real World Usage', function () {
         expect($result)->toBe('Tab problematic-tab failed: Database connection failed');
     });
 });
+
+describe('Content Hooks', function () {
+    it('handles beforeContent with string', function () {
+        $tab = Tab::make('test-tab')
+            ->beforeContent('<div class="alert">Before content</div>');
+
+        expect($tab->hasBeforeContent())->toBeTrue();
+        expect($tab->renderBeforeContent())->toBe('<div class="alert">Before content</div>');
+    });
+
+    it('handles afterContent with string', function () {
+        $tab = Tab::make('test-tab')
+            ->afterContent('<div class="footer">After content</div>');
+
+        expect($tab->hasAfterContent())->toBeTrue();
+        expect($tab->renderAfterContent())->toBe('<div class="footer">After content</div>');
+    });
+
+    it('handles beforeContent with closure', function () {
+        $tab = Tab::make('test-tab')
+            ->beforeContent(function () {
+                return '<div class="dynamic">Dynamic before content</div>';
+            });
+
+        expect($tab->hasBeforeContent())->toBeTrue();
+        expect($tab->renderBeforeContent())->toBe('<div class="dynamic">Dynamic before content</div>');
+    });
+
+    it('handles afterContent with closure', function () {
+        $tab = Tab::make('test-tab')
+            ->afterContent(function () {
+                return '<div class="dynamic">Dynamic after content</div>';
+            });
+
+        expect($tab->hasAfterContent())->toBeTrue();
+        expect($tab->renderAfterContent())->toBe('<div class="dynamic">Dynamic after content</div>');
+    });
+
+    it('handles beforeContent and afterContent together', function () {
+        $tab = Tab::make('test-tab')
+            ->beforeContent('<div class="header">Header</div>')
+            ->afterContent('<div class="footer">Footer</div>');
+
+        expect($tab->hasBeforeContent())->toBeTrue();
+        expect($tab->hasAfterContent())->toBeTrue();
+        expect($tab->renderBeforeContent())->toBe('<div class="header">Header</div>');
+        expect($tab->renderAfterContent())->toBe('<div class="footer">Footer</div>');
+    });
+
+    it('returns empty string when no content hooks are set', function () {
+        $tab = Tab::make('test-tab');
+
+        expect($tab->hasBeforeContent())->toBeFalse();
+        expect($tab->hasAfterContent())->toBeFalse();
+        expect($tab->renderBeforeContent())->toBe('');
+        expect($tab->renderAfterContent())->toBe('');
+    });
+
+    it('handles Htmlable objects', function () {
+        $htmlable = new class implements \Illuminate\Contracts\Support\Htmlable {
+            public function toHtml()
+            {
+                return '<div class="htmlable">Htmlable content</div>';
+            }
+        };
+
+        $tab = Tab::make('test-tab')
+            ->beforeContent($htmlable)
+            ->afterContent($htmlable);
+
+        expect($tab->renderBeforeContent())->toBe('<div class="htmlable">Htmlable content</div>');
+        expect($tab->renderAfterContent())->toBe('<div class="htmlable">Htmlable content</div>');
+    });
+});

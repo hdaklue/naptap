@@ -57,28 +57,49 @@
         @include('naptab::loading-placeholder')
     {{-- Content State --}}
     @else
-        <div wire:key="tab-inner-{{ $tab->getId() }}" x-ref="tab-content-{{ $tab->getId() }}">
-            @if($tab->hasContent())
-                {{-- Callable Content --}}
-                <div class="prose max-w-none dark:prose-invert">
-                    {!! $tab->renderContent() !!}
+        <div wire:key="tab-inner-{{ $tab->getId() }}" x-ref="tab-content-{{ $tab->getId() }}" class="flex flex-col min-h-full">
+            {{-- Before Content (justified start) --}}
+            @if($tab->hasBeforeContent())
+                <div class="flex justify-start mb-4">
+                    <div class="before-content">
+                        {!! $tab->renderBeforeContent() !!}
+                    </div>
                 </div>
-            @elseif($tab->hasLivewireComponent())
-                {{-- Livewire Component --}}
-                <div>
-                    @if($loaded)
-                        @livewire($tab->getLivewireComponent(), $tab->getLivewireParams(), key('tab-livewire-' . $tab->getId()))
-                    @else
-                        @include('naptab::livewire-placeholder', [
-                            'component' => $tab->getLivewireComponent(),
-                            'params' => $tab->getLivewireParams(),
-                            'tabId' => $tab->getId()
-                        ])
-                    @endif
+            @endif
+
+            {{-- Main Content --}}
+            <div class="flex-1">
+                @if($tab->hasContent())
+                    {{-- Callable Content --}}
+                    <div class="prose max-w-none dark:prose-invert">
+                        {!! $tab->renderContent() !!}
+                    </div>
+                @elseif($tab->hasLivewireComponent())
+                    {{-- Livewire Component --}}
+                    <div>
+                        @if($loaded)
+                            @livewire($tab->getLivewireComponent(), $tab->getLivewireParams(), key('tab-livewire-' . $tab->getId()))
+                        @else
+                            @include('naptab::livewire-placeholder', [
+                                'component' => $tab->getLivewireComponent(),
+                                'params' => $tab->getLivewireParams(),
+                                'tabId' => $tab->getId()
+                            ])
+                        @endif
+                    </div>
+                @else
+                    {{-- Empty State --}}
+                    @include('naptab::empty-state', ['tabId' => $tab->getId()])
+                @endif
+            </div>
+
+            {{-- After Content (justified end) --}}
+            @if($tab->hasAfterContent())
+                <div class="flex justify-end mt-4">
+                    <div class="after-content">
+                        {!! $tab->renderAfterContent() !!}
+                    </div>
                 </div>
-            @else
-                {{-- Empty State --}}
-                @include('naptab::empty-state', ['tabId' => $tab->getId()])
             @endif
         </div>
     @endif

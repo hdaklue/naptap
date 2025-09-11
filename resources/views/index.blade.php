@@ -1,14 +1,12 @@
-<div class="nap-tabs-wrapper w-full">
-    {{-- Before Content (justified start) --}}
+<div class="nap-tab-container w-full flex {{ $direction->containerClasses() }} {{ $direction->responsiveClasses() }}" role="tabpanel" aria-label="Tabs interface">
+    {{-- Before Content (respects direction) --}}
     @if($this->hasBeforeContent())
-        <div class="flex justify-start mb-4">
-            <div class="before-tabs-content">
+        <div class="before-tabs-content {{ $direction === \Hdaklue\NapTab\Enums\Direction::Aside ? 'order-first' : '' }} {{ $direction->contentClasses() }}">
+            <div class="flex justify-start {{ $direction === \Hdaklue\NapTab\Enums\Direction::Aside ? 'mb-4' : 'mb-4' }}">
                 {!! $this->renderBeforeContent() !!}
             </div>
         </div>
     @endif
-
-    <div class="nap-tab-container w-full flex {{ $direction->containerClasses() }} {{ $direction->responsiveClasses() }}" role="tabpanel" aria-label="Tabs interface">
     {{-- Tab Navigation with Device Detection --}}
     @php
         $agent = app('agent');
@@ -71,6 +69,15 @@
             @endif
         </div>
     </div>
+
+    {{-- After Content (respects direction) --}}
+    @if($this->hasAfterContent())
+        <div class="after-tabs-content {{ $direction === \Hdaklue\NapTab\Enums\Direction::Aside ? 'order-last' : '' }} {{ $direction->contentClasses() }}">
+            <div class="flex justify-end {{ $direction === \Hdaklue\NapTab\Enums\Direction::Aside ? 'mt-4' : 'mt-4' }}">
+                {!! $this->renderAfterContent() !!}
+            </div>
+        </div>
+    @endif
 
     {{-- Inline styles and scripts within the single root element --}}
     @if ($navigationScript ?? false)
@@ -195,14 +202,4 @@
             }
         }
     </style>
-</div>
-
-    {{-- After Content (justified end) --}}
-    @if($this->hasAfterContent())
-        <div class="flex justify-end mt-4">
-            <div class="after-tabs-content">
-                {!! $this->renderAfterContent() !!}
-            </div>
-        </div>
-    @endif
 </div>

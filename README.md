@@ -443,10 +443,7 @@ class NapTabServiceProvider extends ServiceProvider
                 ->contentAnimation(ContentAnimation::Fade)
                 
                 // Mobile navigation
-                ->navModalOnMobile(false)                    // true = modal, false = scroll
-                
-                // URL routing
-                ->routable(true);                            // Enable {activeTab?} parameter
+                ->navModalOnMobile(false);                   // true = modal, false = scroll
         });
     }
     
@@ -481,7 +478,6 @@ NapTabConfig::create()                              // Create new config instanc
 ```php
 ->contentAnimation(ContentAnimation $animation)     // Content transition animation
 ->navModalOnMobile(bool $useModal = true)          // Mobile modal navigation
-->routable(bool $enabled = true)                   // URL routing with {activeTab?}
 ```
 
 ### Preset Styles
@@ -616,10 +612,22 @@ NapTab provides intelligent mobile navigation that adapts to device capabilities
 
 Enable URL routing to make tabs bookmarkable and SEO-friendly:
 
-### 1. Enable Routing
+### 1. Enable Routing Per Component
 ```php
-// In your NapTabServiceProvider
-->routable(true)
+// In your tab component class
+class DashboardTabs extends NapTab
+{
+    protected function isRoutable(): bool
+    {
+        return true; // Enable routing for this component
+    }
+    
+    // Or disable routing for specific components
+    protected function isRoutable(): bool
+    {
+        return false; // This component won't use URL routing
+    }
+}
 ```
 
 ### 2. Add Route Parameter
@@ -628,8 +636,32 @@ Enable URL routing to make tabs bookmarkable and SEO-friendly:
 Route::get('/dashboard/{activeTab?}', DashboardTabs::class)->name('dashboard');
 ```
 
-### 3. Automatic Navigation
-NapTab automatically:
+### 3. Flexible Routing Control
+
+Now you have complete control over which components use routing:
+
+```php
+// Dashboard with routing (bookmarkable tabs)
+class DashboardTabs extends NapTab
+{
+    protected function isRoutable(): bool
+    {
+        return true;
+    }
+}
+
+// Modal or sidebar tabs without routing
+class UserSettingsTabs extends NapTab
+{
+    protected function isRoutable(): bool
+    {
+        return false; // No URL changes for these tabs
+    }
+}
+```
+
+### 4. Automatic Navigation
+For routable components, NapTab automatically:
 - Updates the URL when tabs are clicked
 - Maintains all existing route parameters
 - Handles browser back/forward navigation

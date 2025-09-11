@@ -41,12 +41,21 @@ abstract class NapTab extends Component
     abstract protected function tabs(): array;
 
     /**
+     * Determine if this tab component should use URL routing
+     * Override this method in your component to control routing per component
+     */
+    protected function isRoutable(): bool
+    {
+        return true; // Default: enable routing
+    }
+
+    /**
      * Auto-detect base route from current request
      * Uses current route with {activeTab?} parameter
      */
     public function baseRoute(): string|null
     {
-        if (!$this->config->isRoutable()) {
+        if (!$this->isRoutable()) {
             return null;
         }
 
@@ -161,7 +170,7 @@ abstract class NapTab extends Component
      */
     protected function getCurrentActiveTab(): string
     {
-        if ($this->config->isRoutable()) {
+        if ($this->isRoutable()) {
             $currentRoute = request()->route();
             
             if ($currentRoute && in_array('activeTab', $currentRoute->parameterNames())) {
@@ -192,7 +201,7 @@ abstract class NapTab extends Component
     public function hydrate(): void
     {
         // When using routable, ensure activeTab is synchronized with route parameter
-        if ($this->config->isRoutable()) {
+        if ($this->isRoutable()) {
             $routeActiveTab = $this->getCurrentActiveTab();
             
             if ($routeActiveTab !== $this->activeTab) {
@@ -273,7 +282,7 @@ abstract class NapTab extends Component
         // Only redirect programmatically if this is not a routable navigation
         $shouldRedirect = false;
         
-        if ($this->config->isRoutable()) {
+        if ($this->isRoutable()) {
             $currentRoute = request()->route();
             
             // Check if this is a programmatic tab switch (not from URL navigation)
@@ -552,7 +561,7 @@ abstract class NapTab extends Component
             // Check authorization before switching
             if ($tab->canAccess()) {
                 // For wire:navigate enabled components, prefer URL redirect
-                if ($this->wireNavigate && $this->config->isRoutable()) {
+                if ($this->wireNavigate && $this->isRoutable()) {
                     $currentRoute = request()->route();
                     if ($currentRoute) {
                         $routeParams = $currentRoute->parameters();

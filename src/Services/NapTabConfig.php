@@ -40,7 +40,6 @@ class NapTabConfig
     protected TabSpacing $spacing = TabSpacing::Normal;
     protected ContentAnimation $contentAnimation = ContentAnimation::Fade;
     protected bool $mobileModalNavigation = false;
-    protected bool $routableEnabled = true;
     protected bool $containerBottomBorder = true;
     protected ?TabStyle $currentStyle = null;
 
@@ -195,9 +194,6 @@ class NapTabConfig
                 'mobile' => [
                     'modal_navigation' => $this->mobileModalNavigation,
                 ],
-                'routing' => [
-                    'enabled' => $this->routableEnabled,
-                ],
             ],
         ];
     }
@@ -257,16 +253,6 @@ class NapTabConfig
         return $this;
     }
 
-    public function routable(bool $enabled = true): self
-    {
-        $this->routableEnabled = $enabled;
-        return $this;
-    }
-
-    public function isRoutable(): bool
-    {
-        return $this->routableEnabled;
-    }
 
     public function containerBorder(bool $enabled = true): self
     {
@@ -281,7 +267,6 @@ class NapTabConfig
     {
         return match ($key) {
             'debug' => config('app.debug', false),
-            'routable' => $this->routableEnabled,
             'mobile_modal' => $this->mobileModalNavigation,
             'primary_color' => $this->primaryColor,
             'secondary_color' => $this->secondaryColor,
@@ -301,7 +286,6 @@ class NapTabConfig
             'debug' => null, // Read-only, handled by Laravel config
             'shadows_enabled' => $this->shadowsEnabled = (bool) $value,
             'double_border' => $this->doubleBorder = (bool) $value,
-            'routable' => $this->routableEnabled = (bool) $value,
             'mobile_modal' => $this->mobileModalNavigation = (bool) $value,
             'container_border' => $this->containerBottomBorder = (bool) $value,
             default => null, // Ignore unknown keys

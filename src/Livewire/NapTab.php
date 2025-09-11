@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Hdaklue\NapTab\Livewire;
 
+use Hdaklue\NapTab\Enums\Direction;
 use Hdaklue\NapTab\Services\NapTabConfig;
 use Hdaklue\NapTab\Services\TabsAccessibilityManager;
 use Hdaklue\NapTab\Services\TabsHookManager;
@@ -47,6 +48,15 @@ abstract class NapTab extends Component
     protected function isRoutable(): bool
     {
         return true; // Default: enable routing
+    }
+
+    /**
+     * Determine the layout direction for this tab component (desktop only)
+     * Override this method in your component to control direction per component
+     */
+    protected function direction(): Direction
+    {
+        return Direction::Horizontal; // Default: horizontal layout
     }
 
     /**
@@ -145,6 +155,9 @@ abstract class NapTab extends Component
                 // Fall back to first accessible tab
                 $resolvedActiveTab = null;
             }
+        } elseif ($resolvedActiveTab && $this->isRoutable()) {
+            // Tab not found and routing is enabled - return 404
+            abort(404, "Tab '{$resolvedActiveTab}' not found");
         }
 
         if (!$resolvedActiveTab || !$this->activeTab) {
@@ -524,6 +537,9 @@ abstract class NapTab extends Component
             $this->markTabAsLoaded($currentActiveTab);
         }
         
+        // Use the direction setting directly
+        $direction = $this->direction();
+        
         return view('naptab::index', [
             'tabs' => $this->getTabsCollection(),
             'activeTab' => $this->activeTab,
@@ -532,6 +548,7 @@ abstract class NapTab extends Component
             'navigationScript' => $this->getNavigationJavaScript(),
             'styles' => $config['styles'],
             'spacing' => $config['styles']['spacing'],
+            'direction' => $direction,
         ]);
     }
 

@@ -8,6 +8,8 @@
 
 Transform your Laravel applications with intelligent tabbed navigation that only loads what users actually need. NapTab eliminates the performance bottleneck of traditional tabs by implementing true lazy loading - heavy database queries and expensive operations execute only when users click tabs, not during initial page load.
 
+Choose between traditional horizontal tabs or modern aside/sidebar layouts that automatically optimize for different screen sizes and create professional dashboard-style interfaces.
+
 **The result? 4x faster page loads and happier users.**
 
 ## Why Developers Choose NapTab
@@ -30,6 +32,7 @@ Traditional tab implementations load all content immediately, creating unnecessa
 
 ### 📱 **Mobile-Optimized Experience**
 - Intelligent navigation that adapts to screen size
+- **Responsive Layout Directions**: Choose between traditional horizontal tabs or modern aside/sidebar layouts that automatically optimize for mobile
 - Touch-friendly interactions with smooth animations
 - Bottom-sheet modal or horizontal scroll options
 - Perfect for responsive Laravel applications
@@ -112,9 +115,17 @@ namespace App\Livewire;
 
 use Hdaklue\NapTab\Livewire\NapTab;
 use Hdaklue\NapTab\UI\Tab;
+use Hdaklue\NapTab\Enums\Direction;
 
 class DashboardTabs extends NapTab
 {
+    // Choose your preferred layout direction
+    protected function direction(): Direction
+    {
+        return Direction::Horizontal; // Default: traditional top tabs
+        // return Direction::Aside;   // Modern sidebar layout for dashboard-style interfaces
+    }
+    
     protected function tabs(): array
     {
         return [
@@ -196,9 +207,9 @@ Your tabs are now intelligently lazy-loaded:
 ## Perfect for Your Use Case
 
 ### ✅ **Dashboard Applications**
-- Analytics panels with heavy chart calculations
+- Analytics panels with heavy chart calculations using **Direction::Aside** for professional sidebar navigation
 - User management interfaces with complex queries
-- Admin panels with multiple data sources
+- Admin panels with multiple data sources optimized for desktop workflows
 
 ### ✅ **E-commerce Platforms**
 - Product detail pages with reviews, specifications, shipping info
@@ -289,6 +300,84 @@ class ComprehensiveTabs extends NapTab
     }
 }
 ```
+
+### Layout Direction Control
+
+**Transform Your Tab Interface with Intelligent Layout Options**
+
+NapTab adapts to your design needs with flexible layout directions that automatically optimize for different screen sizes and use cases.
+
+```php
+<?php
+
+namespace App\Livewire;
+
+use Hdaklue\NapTab\Livewire\NapTab;
+use Hdaklue\NapTab\Enums\Direction;
+use Hdaklue\NapTab\UI\Tab;
+
+class ResponsiveSettings extends NapTab
+{
+    // Override the direction method to control layout
+    protected function direction(): Direction
+    {
+        return Direction::Aside; // Sidebar layout for dashboard-style interfaces
+        // return Direction::Horizontal; // Traditional top tabs (default)
+    }
+    
+    protected function tabs(): array
+    {
+        return [
+            Tab::make('profile', 'Profile Settings')
+                ->icon('user-circle'),
+            Tab::make('privacy', 'Privacy')
+                ->icon('shield-check'),
+            Tab::make('billing', 'Billing')
+                ->icon('credit-card')
+                ->badge(fn() => $this->hasPendingInvoices() ? 'Action Required' : null),
+        ];
+    }
+}
+```
+
+**Available Direction Options**
+
+```php
+// Traditional horizontal layout (default)
+protected function direction(): Direction
+{
+    return Direction::Horizontal;
+}
+
+// Modern aside/sidebar layout  
+protected function direction(): Direction
+{
+    return Direction::Aside;
+}
+```
+
+**Layout Behaviors**
+
+**Direction::Horizontal (Default)**
+- Traditional tabs positioned on top
+- Content displays below the tab navigation
+- Consistent experience across all devices
+- Perfect for content-focused interfaces
+
+**Direction::Aside (Responsive Sidebar)**
+- **Mobile & Tablet**: Automatically falls back to horizontal layout for optimal touch interaction
+- **Desktop (768px+)**: Elegant sidebar navigation with content beside it
+- Clean, uncluttered design with no bottom border under tabs
+- Ideal for dashboard, settings, and admin interfaces
+- Professional spacing between sidebar and content area
+
+**Why Use Aside Layout?**
+
+- **Enhanced User Experience**: Sidebar navigation feels more like native desktop applications
+- **Better Space Utilization**: More vertical content space on wide screens
+- **Professional Appearance**: Modern, dashboard-style interface your users will love
+- **Mobile-First Responsive**: Automatically optimizes for touch devices
+- **Zero Configuration**: Responsive behavior works out of the box
 
 ### Tab API Methods
 
@@ -414,7 +503,7 @@ use Hdaklue\NapTab\Services\NapTabConfig;
 use Hdaklue\NapTab\Enums\{
     TabStyle, TabColor, TabBorderRadius, Shadow, 
     TabSpacing, TabBorderWidth, TabTransition, 
-    TabTransitionTiming, BadgeSize, ContentAnimation
+    TabTransitionTiming, BadgeSize, ContentAnimation, Direction
 };
 use Illuminate\Support\ServiceProvider;
 
@@ -706,6 +795,7 @@ To add custom colors, update the safelist file:
 - **Livewire 3 Optimized**: Takes advantage of the newest Livewire performance improvements  
 - **Tailwind Integration**: Seamless styling with your existing Tailwind workflow
 - **FilamentPHP Compatible**: Perfect companion for admin panel development
+- **Responsive Layout Directions**: Modern aside/sidebar layouts that rival native desktop applications
 
 ### Developer Experience First
 - **Clean API**: Intuitive, chainable methods that feel natural in Laravel

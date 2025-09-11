@@ -229,6 +229,7 @@ class NapTabConfig
         return $this->spacing;
     }
 
+
     public function badgeRadius(TabBorderRadius $radius): self
     {
         $this->badgeRadius = $radius;
@@ -247,12 +248,12 @@ class NapTabConfig
         return $this;
     }
 
+
     public function navModalOnMobile(bool $useModal = true): self
     {
         $this->mobileModalNavigation = $useModal;
         return $this;
     }
-
 
     public function containerBorder(bool $enabled = true): self
     {

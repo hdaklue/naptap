@@ -1,4 +1,4 @@
-<div class="nap-tab-container w-full" role="tabpanel" aria-label="Tabs interface">
+<div class="nap-tab-container w-full flex {{ $direction->containerClasses() }} {{ $direction->responsiveClasses() }}" role="tabpanel" aria-label="Tabs interface">
     {{-- Tab Navigation with Device Detection --}}
     @php
         $agent = app('agent');
@@ -11,21 +11,21 @@
         $isDesktop = $agent->isDesktop() || (!$isMobile && !$isTablet);
     @endphp
     
-    <div class="{{ ($styles['borders']['container_bottom_border'] ?? true) ? 'border-b border-gray-200 dark:border-gray-700' : '' }}">
+    <div class="{{ ($styles['borders']['container_bottom_border'] ?? true) && $direction !== \Hdaklue\NapTab\Enums\Direction::Aside ? 'border-b border-gray-200 dark:border-gray-700' : '' }}">
         {{-- Device-Specific Navigation --}}
         @if($isMobile && $useModalOnMobile)
-            @include('naptab::navigation.mobile-modal', ['tabs' => $tabs, 'activeTab' => $activeTab, 'styles' => $styles, 'spacing' => $spacing])
+            @include('naptab::navigation.mobile-modal', ['tabs' => $tabs, 'activeTab' => $activeTab, 'styles' => $styles, 'spacing' => $spacing, 'direction' => $direction])
         @elseif($isMobile)
-            @include('naptab::navigation.mobile-scroll', ['tabs' => $tabs, 'activeTab' => $activeTab, 'styles' => $styles, 'spacing' => $spacing])
+            @include('naptab::navigation.mobile-scroll', ['tabs' => $tabs, 'activeTab' => $activeTab, 'styles' => $styles, 'spacing' => $spacing, 'direction' => $direction])
         @else
-            @include('naptab::navigation.desktop', ['tabs' => $tabs, 'activeTab' => $activeTab, 'styles' => $styles, 'spacing' => $spacing])
+            @include('naptab::navigation.desktop', ['tabs' => $tabs, 'activeTab' => $activeTab, 'styles' => $styles, 'spacing' => $spacing, 'direction' => $direction])
         @endif
 
     </div>
 
     {{-- Tab Content Area --}}
     <div
-        class="{{ $spacing['content_margin'] ?? 'mt-6' }} items-top relative flex min-h-[400px] justify-center overflow-hidden">
+        class="{{ $direction !== \Hdaklue\NapTab\Enums\Direction::Aside ? ($spacing['content_margin'] ?? 'mt-6') : '' }} {{ $direction->contentClasses() }} items-top relative flex min-h-[400px] justify-center overflow-hidden">
         {{-- Loading indicator --}}
         <div wire:loading wire:target="switchTab"
             class="wire:loading:opacity-100 wire:loading:pointer-events-auto pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-white/90 opacity-0 backdrop-blur-sm transition-all duration-200 ease-in-out dark:bg-gray-900/90">

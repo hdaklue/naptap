@@ -42,8 +42,9 @@ class NapTabServiceProvider extends ServiceProvider
                 // Mobile navigation - set to true for modal, false for enhanced scrolling
                 ->navModalOnMobile(false);
                 
-                // Note: URL routing is now controlled per component via the isRoutable() method
-                // Override isRoutable() in your tab components to enable/disable routing per component
+                // Note: URL routing and layout direction are now controlled per component
+                // - Override isRoutable() in your tab components to enable/disable routing per component
+                // - Override direction() in your tab components to set horizontal/vertical layout (desktop only)
                 
             // Available enum values:
             // TabStyle: Minimal, Modern, Sharp

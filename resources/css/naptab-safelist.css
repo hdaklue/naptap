@@ -174,3 +174,12 @@
 @source inline("dark:shadow-violet-{400/20}");
 @source inline("dark:shadow-fuchsia-{400/20}");
 @source inline("dark:shadow-rose-{400/20}");
+
+/* Layout and flexbox utilities for Direction enum */
+@source inline("flex flex-col flex-row");
+@source inline("md:flex-row lg:flex-row");
+@source inline("overflow-x-auto overflow-y-auto");
+@source inline("min-w-48 min-w-0");
+@source inline("flex-1");
+@source inline("w-full");
+@source inline("mr-6 pl-2");

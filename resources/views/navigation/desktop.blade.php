@@ -1,6 +1,6 @@
 {{-- Desktop Tab Navigation with Auto-Scroll --}}
-<nav class="{{ $spacing['tab_gap'] ?? 'gap-2' }} {{ $spacing['nav_padding'] ?? 'px-1' }} -mb-px flex w-full 
-    overflow-x-auto scrollbar-hide scroll-smooth snap-x snap-mandatory"
+<nav class="{{ $spacing['tab_gap'] ?? 'gap-2' }} {{ $spacing['nav_padding'] ?? 'px-1' }} -mb-px flex {{ $direction->navigationClasses() }} 
+    scrollbar-hide scroll-smooth snap-x snap-mandatory"
     aria-label="Tabs" role="tablist" 
     x-data="{ 
         scrollToActive() {

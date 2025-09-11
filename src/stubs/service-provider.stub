@@ -40,10 +40,10 @@ class NapTabServiceProvider extends ServiceProvider
                 ->badgeRadius(TabBorderRadius::Full)
                 
                 // Mobile navigation - set to true for modal, false for enhanced scrolling
-                ->navModalOnMobile(false)
+                ->navModalOnMobile(false);
                 
-                // URL routing - set to true to enable URL-based navigation with {activeTab?} parameter
-                ->routable(true);
+                // Note: URL routing is now controlled per component via the isRoutable() method
+                // Override isRoutable() in your tab components to enable/disable routing per component
                 
             // Available enum values:
             // TabStyle: Minimal, Modern, Sharp

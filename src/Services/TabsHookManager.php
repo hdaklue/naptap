@@ -18,7 +18,10 @@ class TabsHookManager
 
     public function __construct()
     {
-        $this->config = config('naptab.hooks', []);
+        $this->config = [
+            'dispatch_events' => false,
+            'debug' => config('app.debug', false),
+        ];
     }
 
     /**

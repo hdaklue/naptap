@@ -42,7 +42,7 @@ class NapTabConfig
     protected bool $mobileModalNavigation = false;
     protected bool $routableEnabled = true;
     protected bool $containerBottomBorder = true;
-    protected null|TabStyle $currentStyle = null;
+    protected ?TabStyle $currentStyle = null;
 
     public static function create(): self
     {
@@ -56,7 +56,7 @@ class NapTabConfig
         return $style->configure($this);
     }
 
-    public function color(TabColor $primary, TabColor $secondary = null): self
+    public function color(TabColor $primary, ?TabColor $secondary = null): self
     {
         $this->primaryColor = $primary;
         if ($secondary) {
@@ -65,7 +65,7 @@ class NapTabConfig
         return $this;
     }
 
-    public function shadow(Shadow $shadow, string $color = null): self
+    public function shadow(Shadow $shadow, ?string $color = null): self
     {
         $this->shadowsEnabled = $shadow !== Shadow::None;
         $this->shadow = $shadow;
@@ -81,7 +81,7 @@ class NapTabConfig
         return $this;
     }
 
-    public function transition(TabTransition $duration, TabTransitionTiming $timing = null): self
+    public function transition(TabTransition $duration, ?TabTransitionTiming $timing = null): self
     {
         $this->transitionDuration = $duration;
         if ($timing) {
@@ -96,7 +96,7 @@ class NapTabConfig
         return $this;
     }
 
-    public function border(TabBorderWidth $width, bool $doubleBorder = null): self
+    public function border(TabBorderWidth $width, ?bool $doubleBorder = null): self
     {
         $this->borderWidth = $width;
         if ($doubleBorder !== null) {
@@ -147,7 +147,11 @@ class NapTabConfig
             ->containerBorder(false); // No container bottom border for clean pill design
     }
 
-    // Convert to array for template usage
+    /**
+     * Convert to array for template usage
+     * 
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         return [
@@ -267,6 +271,42 @@ class NapTabConfig
     public function containerBorder(bool $enabled = true): self
     {
         $this->containerBottomBorder = $enabled;
+        return $this;
+    }
+
+    /**
+     * Get configuration value by key
+     */
+    public function get(string $key, mixed $default = null): mixed
+    {
+        return match ($key) {
+            'debug' => config('app.debug', false),
+            'routable' => $this->routableEnabled,
+            'mobile_modal' => $this->mobileModalNavigation,
+            'primary_color' => $this->primaryColor,
+            'secondary_color' => $this->secondaryColor,
+            'shadows_enabled' => $this->shadowsEnabled,
+            'double_border' => $this->doubleBorder,
+            'container_border' => $this->containerBottomBorder,
+            default => $default,
+        };
+    }
+
+    /**
+     * Set configuration value by key (for dynamic configuration)
+     */
+    public function set(string $key, mixed $value): self
+    {
+        match ($key) {
+            'debug' => null, // Read-only, handled by Laravel config
+            'shadows_enabled' => $this->shadowsEnabled = (bool) $value,
+            'double_border' => $this->doubleBorder = (bool) $value,
+            'routable' => $this->routableEnabled = (bool) $value,
+            'mobile_modal' => $this->mobileModalNavigation = (bool) $value,
+            'container_border' => $this->containerBottomBorder = (bool) $value,
+            default => null, // Ignore unknown keys
+        };
+
         return $this;
     }
 }

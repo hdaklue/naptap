@@ -6,6 +6,7 @@ namespace Hdaklue\NapTab\Providers;
 
 use Hdaklue\NapTab\Console\Commands\InstallCommand;
 use Hdaklue\NapTab\Livewire\NapTab;
+use Hdaklue\NapTab\Services\NapTabConfig;
 use Hdaklue\NapTab\Services\TabsAccessibilityManager;
 use Hdaklue\NapTab\Services\TabsHookManager;
 use Hdaklue\NapTab\Services\TabsLayoutManager;
@@ -20,7 +21,16 @@ class NapTabServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // Register service classes (config is handled by app's NapTabServiceProvider)
+        // Register NapTabConfig as singleton with both string and class bindings
+        $this->app->singleton('naptab.config', function ($app) {
+            return new NapTabConfig();
+        });
+        
+        $this->app->singleton(NapTabConfig::class, function ($app) {
+            return $app['naptab.config'];
+        });
+
+        // Register other service classes
         $this->app->singleton(TabsNavigationManager::class);
         $this->app->singleton(TabsHookManager::class);
         $this->app->singleton(TabsLayoutManager::class);
@@ -40,17 +50,17 @@ class NapTabServiceProvider extends ServiceProvider
             $this->commands([
                 InstallCommand::class,
             ]);
+
+            // Publish views
+            $this->publishes([
+                __DIR__ . '/../../resources/views' => resource_path('views/vendor/naptab'),
+            ], 'naptab-views');
+
+            // Publish CSS files
+            $this->publishes([
+                __DIR__ . '/../../resources/css' => public_path('vendor/naptab'),
+            ], 'naptab-assets');
         }
-
-        // Publish views
-        $this->publishes([
-            __DIR__ . '/../../resources/views' => resource_path('views/vendor/naptab'),
-        ], 'naptab-views');
-
-        // Publish CSS files
-        $this->publishes([
-            __DIR__ . '/../../resources/css' => public_path('vendor/naptab'),
-        ], 'naptab-assets');
 
         // Load views
         $this->loadViewsFrom(__DIR__ . '/../../resources/views', 'naptab');

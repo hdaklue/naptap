@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Hdaklue\NapTab\Services;
 
-use Hdaklue\NapTab\Services\Tab;
+use Hdaklue\NapTab\UI\Tab;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
@@ -15,6 +15,7 @@ use Illuminate\Support\Str;
  */
 class TabsSecurityManager
 {
+    /** @var array<string, mixed> */
     private array $config;
     private Request $request;
 
@@ -69,7 +70,7 @@ class TabsSecurityManager
     /**
      * Get rate limit reset time
      */
-    public function getRateLimitResetTime(string $tabId, string $identifier): null|int
+    public function getRateLimitResetTime(string $tabId, string $identifier): ?int
     {
         if (!($this->config['rate_limiting']['enabled'] ?? false)) {
             return null;
@@ -107,8 +108,10 @@ class TabsSecurityManager
 
     /**
      * Validate tab access permissions
+     * 
+     * @return array<string, mixed>
      */
-    public function canAccessTab(Tab $tab, null|string $userId = null): array
+    public function canAccessTab(Tab $tab, ?string $userId = null): array
     {
         $result = [
             'allowed' => true,
@@ -205,6 +208,8 @@ class TabsSecurityManager
 
     /**
      * Get security headers for tab responses
+     * 
+     * @return array<string, string>
      */
     public function getSecurityHeaders(): array
     {
@@ -227,6 +232,8 @@ class TabsSecurityManager
 
     /**
      * Validate and sanitize tab ID
+     * 
+     * @throws \InvalidArgumentException When tab ID is invalid after sanitization
      */
     public function sanitizeTabId(string $tabId): string
     {
@@ -245,6 +252,8 @@ class TabsSecurityManager
 
     /**
      * Get security configuration for frontend
+     * 
+     * @return array<string, mixed>
      */
     public function getSecurityConfig(): array
     {
@@ -415,7 +424,7 @@ class TabsSecurityManager
         return $content;
     }
 
-    private function checkMiddleware(string $middleware, Tab $tab, null|string $userId): bool
+    private function checkMiddleware(string $middleware, Tab $tab, ?string $userId): bool
     {
         // This is a simplified middleware check
         // In a real implementation, you would integrate with Laravel's middleware system
@@ -431,7 +440,10 @@ class TabsSecurityManager
         }
     }
 
-    private function checkPermissions(array $permissions, null|string $userId): bool
+    /**
+     * @param array<string> $permissions
+     */
+    private function checkPermissions(array $permissions, ?string $userId): bool
     {
         // This is a simplified permission check
         // In a real implementation, you would integrate with your authorization system
@@ -450,7 +462,7 @@ class TabsSecurityManager
         return true;
     }
 
-    private function generateContentSecurityPolicy(): null|string
+    private function generateContentSecurityPolicy(): ?string
     {
         if (!($this->config['xss_protection'] ?? true)) {
             return null;
@@ -469,6 +481,9 @@ class TabsSecurityManager
         return implode('; ', $policies);
     }
 
+    /**
+     * @param array<string, mixed> $context
+     */
     private function logSecurityEvent(string $event, string $tabId, array $context = []): void
     {
         Log::warning("Tabs Security: {$event}", array_merge([

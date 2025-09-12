@@ -1,78 +1,98 @@
 <div class="nap-tabs-wrapper w-full">
     {{-- Before Content (separate container) --}}
-    @if($this->hasBeforeContent())
+    @if ($this->hasBeforeContent())
         <div class="before-tabs-content mb-4">
             {!! $this->renderBeforeContent() !!}
         </div>
     @endif
 
-    <div class="nap-tab-container w-full flex {{ $direction->containerClasses() }} {{ $direction->responsiveClasses() }}" role="tabpanel" aria-label="Tabs interface">
-    {{-- Tab Navigation with Device Detection --}}
-    @php
-        $agent = app('agent');
-        $mobileConfig = $styles['mobile'] ?? [];
-        $useModalOnMobile = $mobileConfig['modal_navigation'] ?? false;
-        
-        // Detect device type
-        $isMobile = $agent->isMobile() && !$agent->isTablet();
-        $isTablet = $agent->isTablet();
-        $isDesktop = $agent->isDesktop() || (!$isMobile && !$isTablet);
-    @endphp
-    
-    <div class="{{ ($styles['borders']['container_bottom_border'] ?? true) && $direction !== \Hdaklue\NapTab\Enums\Direction::Aside ? 'border-b border-gray-200 dark:border-gray-700' : '' }}">
-        {{-- Device-Specific Navigation --}}
-        @if($isMobile && $useModalOnMobile)
-            @include('naptab::navigation.mobile-modal', ['tabs' => $tabs, 'activeTab' => $activeTab, 'styles' => $styles, 'spacing' => $spacing, 'direction' => $direction])
-        @elseif($isMobile)
-            @include('naptab::navigation.mobile-scroll', ['tabs' => $tabs, 'activeTab' => $activeTab, 'styles' => $styles, 'spacing' => $spacing, 'direction' => $direction])
-        @else
-            @include('naptab::navigation.desktop', ['tabs' => $tabs, 'activeTab' => $activeTab, 'styles' => $styles, 'spacing' => $spacing, 'direction' => $direction])
-        @endif
+    <div class="nap-tab-container {{ $direction->containerClasses() }} {{ $direction->responsiveClasses() }} flex w-full"
+        role="tabpanel" aria-label="Tabs interface">
+        {{-- Tab Navigation with Device Detection --}}
+        @php
+            $agent = app('agent');
+            $mobileConfig = $styles['mobile'] ?? [];
+            $useModalOnMobile = $mobileConfig['modal_navigation'] ?? false;
 
-    </div>
+            // Detect device type
+            $isMobile = $agent->isMobile() && !$agent->isTablet();
+            $isTablet = $agent->isTablet();
+            $isDesktop = $agent->isDesktop() || (!$isMobile && !$isTablet);
+        @endphp
 
-    {{-- Tab Content Area --}}
-    <div
-        class="{{ $direction !== \Hdaklue\NapTab\Enums\Direction::Aside ? ($spacing['content_margin'] ?? 'mt-6') : '' }} {{ $direction->contentClasses() }} items-top relative flex min-h-[400px] justify-center overflow-hidden">
-        {{-- Loading indicator --}}
-        <div wire:loading wire:target="switchTab"
-            class="wire:loading:opacity-100 wire:loading:pointer-events-auto pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-white/90 opacity-0 backdrop-blur-sm transition-all duration-200 ease-in-out dark:bg-gray-900/90">
-            <div
-                class="wire:loading:scale-100 scale-95 transform text-center transition-transform duration-200 ease-out">
-                <div
-                    class="mx-auto mb-3 h-6 w-6 animate-spin rounded-full border-b-2 border-blue-500 dark:border-blue-400">
-                </div>
-                <p class="text-sm text-gray-600 dark:text-gray-400">Loading...</p>
-            </div>
-        </div>
-
-        {{-- Tab content --}}
-        <div class="nap-tab-content w-full p-4 flex flex-col transition-opacity duration-200 ease-in-out"
-            wire:key="tab-panel-{{ $activeTab }}"
-            wire:loading.class="opacity-30" wire:target="switchTab" id="tabpanel-{{ $activeTab }}" role="tabpanel"
-            aria-labelledby="tab-{{ $activeTab }}" tabindex="0">
-            @php
-                $activeTabObj = $tabs->get($activeTab);
-            @endphp
-
-            @if ($activeTabObj)
-                @include('naptab::tab-content', [
-                    'tab' => $activeTabObj, 
-                    'active' => true, 
-                    'loaded' => isset($loadedTabs[$activeTab]), 
-                    'error' => $tabErrors[$activeTab] ?? null
+        <div
+            class="{{ ($styles['borders']['container_bottom_border'] ?? true) && $direction !== \Hdaklue\NapTab\Enums\Direction::Aside ? 'border-b border-gray-200 dark:border-gray-700' : '' }}">
+            {{-- Device-Specific Navigation --}}
+            @if ($isMobile && $useModalOnMobile)
+                @include('naptab::navigation.mobile-modal', [
+                    'tabs' => $tabs,
+                    'activeTab' => $activeTab,
+                    'styles' => $styles,
+                    'spacing' => $spacing,
+                    'direction' => $direction,
+                ])
+            @elseif($isMobile)
+                @include('naptab::navigation.mobile-scroll', [
+                    'tabs' => $tabs,
+                    'activeTab' => $activeTab,
+                    'styles' => $styles,
+                    'spacing' => $spacing,
+                    'direction' => $direction,
                 ])
             @else
-                <div class="py-12 text-center text-gray-500 dark:text-gray-400" role="status" aria-live="polite">
-                    <p>No active tab selected.</p>
-                </div>
+                @include('naptab::navigation.desktop', [
+                    'tabs' => $tabs,
+                    'activeTab' => $activeTab,
+                    'styles' => $styles,
+                    'spacing' => $spacing,
+                    'direction' => $direction,
+                ])
             @endif
+
+        </div>
+
+        {{-- Tab Content Area --}}
+        <div
+            class="{{ $direction !== \Hdaklue\NapTab\Enums\Direction::Aside ? $spacing['content_margin'] ?? 'mt-6' : '' }} {{ $direction->contentClasses() }} items-top relative flex min-h-[400px] justify-center overflow-hidden">
+            {{-- Loading indicator --}}
+            <div wire:loading wire:target="switchTab"
+                class="wire:loading:opacity-100 wire:loading:pointer-events-auto pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-white/90 opacity-0 backdrop-blur-sm transition-all duration-200 ease-in-out dark:bg-gray-900/90">
+                <div
+                    class="wire:loading:scale-100 scale-95 transform text-center transition-transform duration-200 ease-out">
+                    <div
+                        class="mx-auto mb-3 h-6 w-6 animate-spin rounded-full border-b-2 border-blue-500 dark:border-blue-400">
+                    </div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Loading...</p>
+                </div>
+            </div>
+
+            {{-- Tab content --}}
+            <div class="nap-tab-content flex w-full flex-col p-4 transition-opacity duration-200 ease-in-out"
+                wire:key="tab-panel-{{ $activeTab }}" wire:loading.class="opacity-30" wire:target="switchTab"
+                id="tabpanel-{{ $activeTab }}" role="tabpanel" aria-labelledby="tab-{{ $activeTab }}"
+                tabindex="0">
+                @php
+                    $activeTabObj = $tabs->get($activeTab);
+                @endphp
+
+                @if ($activeTabObj)
+                    @include('naptab::tab-content', [
+                        'tab' => $activeTabObj,
+                        'active' => true,
+                        'loaded' => isset($loadedTabs[$activeTab]),
+                        'error' => $tabErrors[$activeTab] ?? null,
+                    ])
+                @else
+                    <div class="py-12 text-center text-gray-500 dark:text-gray-400" role="status" aria-live="polite">
+                        <p>No active tab selected.</p>
+                    </div>
+                @endif
+            </div>
         </div>
     </div>
-</div>
 
     {{-- After Content (separate container) --}}
-    @if($this->hasAfterContent())
+    @if ($this->hasAfterContent())
         <div class="after-tabs-content mt-4">
             {!! $this->renderAfterContent() !!}
         </div>
@@ -92,25 +112,25 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
-        
+
         .scrollbar-hide::-webkit-scrollbar {
             display: none;
         }
-        
+
         /* Snap to tab items on mobile */
         .snap-x {
             scroll-snap-type: x mandatory;
         }
-        
+
         .snap-mandatory {
             scroll-snap-type: x mandatory;
         }
-        
+
         .tab-button {
             scroll-snap-align: center;
             scroll-snap-stop: normal;
         }
-        
+
         /* Tab styling for all screen sizes */
         .tab-button {
             min-width: fit-content;
@@ -131,17 +151,17 @@
 
         /* Tab button smooth transitions */
         .tab-button {
-            transition: background-color 200ms ease-in-out, 
-                       color 200ms ease-in-out,
-                       border-color 200ms ease-in-out,
-                       opacity 200ms ease-in-out;
+            transition: background-color 200ms ease-in-out,
+                color 200ms ease-in-out,
+                border-color 200ms ease-in-out,
+                opacity 200ms ease-in-out;
         }
-        
+
         /* Active tab underline smooth transition */
         .tab-active-premium::after {
             transition: opacity 250ms ease-in-out;
         }
-        
+
         /* Simple hover effects */
         .tab-hover-simple {
             transition: background-color 150ms ease-in-out;
@@ -186,6 +206,7 @@
 
         /* Reduce motion for accessibility */
         @media (prefers-reduced-motion: reduce) {
+
             .nap-tab-content,
             .tab-button,
             .tab-hover-simple {
@@ -201,5 +222,4 @@
             }
         }
     </style>
-</div>
 </div>

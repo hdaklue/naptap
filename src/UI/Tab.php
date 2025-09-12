@@ -172,12 +172,12 @@ class Tab extends Component
         return $this->evaluate($this->label);
     }
 
-    public function getIcon(): ?string
+    public function getIcon(): null|string
     {
         return $this->evaluate($this->icon);
     }
 
-    public function getBadge(): ?string
+    public function getBadge(): null|string
     {
         return $this->evaluate($this->badge);
     }
@@ -202,12 +202,12 @@ class Tab extends Component
         return true; // Default: visible
     }
 
-    public function getContent(): ?Closure
+    public function getContent(): null|Closure
     {
         return $this->content;
     }
 
-    public function getLivewireComponent(): ?string
+    public function getLivewireComponent(): null|string
     {
         return $this->evaluate($this->livewireComponent);
     }
@@ -285,8 +285,6 @@ class Tab extends Component
         if ($this->content === null) {
             return '';
         }
-
-        // Handle Htmlable objects
         if ($this->content instanceof Htmlable) {
             return $this->content->toHtml();
         }
@@ -392,7 +390,7 @@ class Tab extends Component
 
     /**
      * Redirect with Livewire navigation for this tab
-     * 
+     *
      * @throws InvalidArgumentException When URL is invalid or uses disallowed schemes
      */
     public function navigateToTab(string $url): void
@@ -405,11 +403,11 @@ class Tab extends Component
         // Additional validation for absolute URLs
         if (filter_var($url, FILTER_VALIDATE_URL)) {
             $parsedUrl = parse_url($url);
-            
+
             // Only allow HTTP and HTTPS schemes to prevent XSS via javascript: or data: URIs
             $allowedSchemes = ['http', 'https'];
             $scheme = $parsedUrl['scheme'] ?? '';
-            
+
             if (!in_array($scheme, $allowedSchemes, true)) {
                 throw new InvalidArgumentException('Only HTTP and HTTPS URLs are allowed');
             }

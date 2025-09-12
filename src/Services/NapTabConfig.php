@@ -39,9 +39,9 @@ class NapTabConfig
     protected TabTransitionTiming $transitionTiming = TabTransitionTiming::EaseInOut;
     protected TabSpacing $spacing = TabSpacing::Normal;
     protected ContentAnimation $contentAnimation = ContentAnimation::Fade;
-    protected bool $mobileModalNavigation = false;
+    protected bool $mobileModalNavigation = true;
     protected bool $containerBottomBorder = true;
-    protected ?TabStyle $currentStyle = null;
+    protected null|TabStyle $currentStyle = null;
 
     public static function create(): self
     {
@@ -55,7 +55,7 @@ class NapTabConfig
         return $style->configure($this);
     }
 
-    public function color(TabColor $primary, ?TabColor $secondary = null): self
+    public function color(TabColor $primary, null|TabColor $secondary = null): self
     {
         $this->primaryColor = $primary;
         if ($secondary) {
@@ -64,7 +64,7 @@ class NapTabConfig
         return $this;
     }
 
-    public function shadow(Shadow $shadow, ?string $color = null): self
+    public function shadow(Shadow $shadow, null|string $color = null): self
     {
         $this->shadowsEnabled = $shadow !== Shadow::None;
         $this->shadow = $shadow;
@@ -80,7 +80,7 @@ class NapTabConfig
         return $this;
     }
 
-    public function transition(TabTransition $duration, ?TabTransitionTiming $timing = null): self
+    public function transition(TabTransition $duration, null|TabTransitionTiming $timing = null): self
     {
         $this->transitionDuration = $duration;
         if ($timing) {
@@ -95,7 +95,7 @@ class NapTabConfig
         return $this;
     }
 
-    public function border(TabBorderWidth $width, ?bool $doubleBorder = null): self
+    public function border(TabBorderWidth $width, null|bool $doubleBorder = null): self
     {
         $this->borderWidth = $width;
         if ($doubleBorder !== null) {
@@ -148,7 +148,7 @@ class NapTabConfig
 
     /**
      * Convert to array for template usage
-     * 
+     *
      * @return array<string, mixed>
      */
     public function toArray(): array
@@ -229,7 +229,6 @@ class NapTabConfig
         return $this->spacing;
     }
 
-
     public function badgeRadius(TabBorderRadius $radius): self
     {
         $this->badgeRadius = $radius;
@@ -247,7 +246,6 @@ class NapTabConfig
         $this->contentAnimation = $animation;
         return $this;
     }
-
 
     public function navModalOnMobile(bool $useModal = true): self
     {

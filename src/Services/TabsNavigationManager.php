@@ -229,19 +229,54 @@ class TabsNavigationManager
 
                 // Handle browser back/forward navigation
                 handlePopState: function(event) {
+                    // Prevent handling during ongoing navigation
+                    if (window.navigatingToTab || this.isNavigating) {
+                        return;
+                    }
+                    
+                    let tabId = null;
+                    
+                    // Try to get tab from state first
                     if (event.state && event.state.tab_id) {
-                        const event = new CustomEvent('tabs:popstate', {
+                        tabId = event.state.tab_id;
+                    } else {
+                        // Extract tab from current URL
+                        const urlParts = window.location.pathname.split('/');
+                        const lastSegment = urlParts[urlParts.length - 1];
+                        
+                        // Only use as tab if it looks like a valid tab ID
+                        if (lastSegment && lastSegment.length > 0 && 
+                            lastSegment !== 'dashboard' && 
+                            lastSegment.match(/^[a-zA-Z0-9_-]+$/)) {
+                            tabId = lastSegment;
+                        }
+                    }
+                    
+                    if (tabId) {
+                        const customEvent = new CustomEvent('tabs:popstate', {
                             detail: {
-                                tabId: event.state.tab_id,
-                                state: event.state
+                                tabId: tabId,
+                                state: event.state || {},
+                                url: window.location.href,
+                                timestamp: Date.now()
                             }
                         });
-                        document.dispatchEvent(event);
+                        document.dispatchEvent(customEvent);
+                        
+                        // Also dispatch Livewire event for component handling
+                        if (window.Livewire) {
+                            window.Livewire.dispatch('browser:popstate', {
+                                tab: tabId,
+                                timestamp: Date.now()
+                            });
+                        }
                     }
                 },
 
                 // Initialize navigation handling
                 init: function() {
+                    this.isNavigating = false;
+                    
                     if (this.config.browser_history) {
                         window.addEventListener('popstate', this.handlePopState.bind(this));
                     }
@@ -250,6 +285,17 @@ class TabsNavigationManager
                     if (this.config.deep_linking) {
                         this.handleDeepLinking();
                     }
+                    
+                    // Listen for Livewire navigation events
+                    document.addEventListener('livewire:navigate', () => {
+                        this.isNavigating = true;
+                    });
+                    
+                    document.addEventListener('livewire:navigated', () => {
+                        setTimeout(() => {
+                            this.isNavigating = false;
+                        }, 100);
+                    });
                 },
 
                 // Handle deep linking on page load

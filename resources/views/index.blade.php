@@ -104,6 +104,107 @@
             {!! $navigationScript !!}
         </script>
     @endif
+    
+    {{-- Enhanced navigation handling for wire:navigate --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabContainer = document.querySelector('.nap-tabs-wrapper');
+            if (!tabContainer) return;
+            
+            let isNavigating = false;
+            let navigationTimeout = null;
+            
+            // Handle Livewire navigation start
+            document.addEventListener('livewire:navigate', function(event) {
+                isNavigating = true;
+                
+                // Clear any existing timeout
+                if (navigationTimeout) {
+                    clearTimeout(navigationTimeout);
+                }
+                
+                // Dispatch custom event
+                window.dispatchEvent(new CustomEvent('tabs:navigate-start', {
+                    detail: { 
+                        url: event.detail?.url || window.location.href,
+                        timestamp: Date.now()
+                    }
+                }));
+            });
+            
+            // Handle Livewire navigation completion
+            document.addEventListener('livewire:navigated', function(event) {
+                // Reset navigation state with a delay to prevent race conditions
+                navigationTimeout = setTimeout(() => {
+                    isNavigating = false;
+                    window.navigatingToTab = false;
+                    
+                    // Dispatch completion event
+                    window.dispatchEvent(new CustomEvent('tabs:navigate-complete', {
+                        detail: { 
+                            url: window.location.href,
+                            timestamp: Date.now()
+                        }
+                    }));
+                }, 100);
+            });
+            
+            // Handle browser back/forward navigation
+            window.addEventListener('popstate', function(event) {
+                if (isNavigating) return; // Ignore if already navigating
+                
+                // Extract tab from URL
+                const urlParts = window.location.pathname.split('/');
+                const potentialTab = urlParts[urlParts.length - 1];
+                
+                // Dispatch event for Livewire component to handle
+                if (potentialTab && potentialTab !== '' && potentialTab !== 'dashboard') {
+                    window.dispatchEvent(new CustomEvent('tabs:browser-navigate', {
+                        detail: {
+                            tab: potentialTab,
+                            state: event.state,
+                            timestamp: Date.now()
+                        }
+                    }));
+                    
+                    // Also trigger Livewire event if available
+                    if (window.Livewire) {
+                        window.Livewire.dispatch('browser:popstate', {
+                            tab: potentialTab,
+                            timestamp: Date.now()
+                        });
+                    }
+                }
+            });
+            
+            // Handle rapid click prevention
+            tabContainer.addEventListener('click', function(event) {
+                const tabElement = event.target.closest('[data-tab-id]');
+                if (!tabElement) return;
+                
+                // Prevent rapid clicks on the same tab
+                if (tabElement.dataset.lastClicked) {
+                    const timeSinceClick = Date.now() - parseInt(tabElement.dataset.lastClicked);
+                    if (timeSinceClick < 500) { // 500ms cooldown
+                        event.preventDefault();
+                        event.stopPropagation();
+                        return false;
+                    }
+                }
+                
+                tabElement.dataset.lastClicked = Date.now().toString();
+            });
+            
+            // Clean up navigation state on page unload
+            window.addEventListener('beforeunload', function() {
+                isNavigating = false;
+                window.navigatingToTab = false;
+                if (navigationTimeout) {
+                    clearTimeout(navigationTimeout);
+                }
+            });
+        });
+    </script>
 
 
     <style>

@@ -307,30 +307,49 @@ abstract class NapTab extends Component
         if ($this->isRoutable()) {
             $routeActiveTab = $this->getCurrentActiveTab();
             
-            if ($routeActiveTab !== $this->activeTab) {
-                $oldTab = $this->activeTab;
-                $this->activeTab = $routeActiveTab;
+            // Only synchronize if there's actually a change and the route tab is valid
+            if ($routeActiveTab && $routeActiveTab !== $this->activeTab) {
+                $tabs = $this->getTabsCollection();
                 
-                // Ensure the new tab is loaded for immediate display
-                $this->markTabAsLoaded($routeActiveTab);
-                
-                // Dispatch tab changed event for frontend synchronization
-                $this->dispatch('tab-changed', [
-                    'oldTab' => $oldTab,
-                    'newTab' => $routeActiveTab,
-                    'source' => 'navigation' // Indicate this came from browser navigation
-                ]);
-                
-                // Dispatch window event for browser integration
-                $this->js("
-                    window.dispatchEvent(new CustomEvent('tab:navigationChanged', {
-                        detail: {
-                            oldTab: " . json_encode($oldTab) . ",
-                            newTab: " . json_encode($routeActiveTab) . ",
-                            source: 'wire-navigate'
-                        }
-                    }));
-                ");
+                // Validate the route tab exists and is accessible
+                if ($tabs->has($routeActiveTab)) {
+                    $tab = $tabs->get($routeActiveTab);
+                    
+                    if ($tab->canAccess()) {
+                        $oldTab = $this->activeTab;
+                        $this->activeTab = $routeActiveTab;
+                        
+                        // Force reload the tab content on navigation
+                        // This ensures content is fresh when navigating back
+                        $this->markTabAsLoaded($routeActiveTab);
+                        
+                        // Clear any previous errors for this tab
+                        unset($this->tabErrors[$routeActiveTab]);
+                        
+                        // Dispatch tab changed event for frontend synchronization
+                        $this->dispatch('tab-changed', [
+                            'oldTab' => $oldTab,
+                            'newTab' => $routeActiveTab,
+                            'source' => 'navigation', // Indicate this came from browser navigation
+                            'reloaded' => true // Mark that content was reloaded
+                        ]);
+                        
+                        // Dispatch window event for browser integration with better timing
+                        $this->js("
+                            // Delay to ensure DOM is ready
+                            setTimeout(() => {
+                                window.dispatchEvent(new CustomEvent('tab:navigationChanged', {
+                                    detail: {
+                                        oldTab: " . json_encode($oldTab) . ",
+                                        newTab: " . json_encode($routeActiveTab) . ",
+                                        source: 'wire-navigate',
+                                        timestamp: Date.now()
+                                    }
+                                }));
+                            }, 50);
+                        ");
+                    }
+                }
             }
         }
     }
@@ -393,7 +412,8 @@ abstract class NapTab extends Component
                 $currentActiveTab = $currentRoute->parameter('activeTab');
                 
                 // Only redirect if we're switching to a different tab programmatically
-                if ($currentActiveTab !== $tabId) {
+                // and this wasn't triggered by a hydration/navigation event
+                if ($currentActiveTab !== $tabId && !$this->isFromNavigation()) {
                     $shouldRedirect = true;
                 }
             }
@@ -418,6 +438,13 @@ abstract class NapTab extends Component
                 }
             } catch (\Exception $e) {
                 // Fallback to SPA mode if route building fails
+                // Log the error but don't fail
+                if (config('app.debug')) {
+                    logger()->warning('NapTab: Route building failed during tab switch', [
+                        'tab_id' => $tabId,
+                        'error' => $e->getMessage()
+                    ]);
+                }
             }
         }
     }
@@ -621,10 +648,26 @@ abstract class NapTab extends Component
         $config = $this->config()->toArray();
         $currentActiveTab = $this->getCurrentActiveTab();
         
-        // Update activeTab if it changed via route
-        if ($currentActiveTab !== $this->activeTab) {
-            $this->activeTab = $currentActiveTab;
-            $this->markTabAsLoaded($currentActiveTab);
+        // Update activeTab if it changed via route, but be more careful about timing
+        if ($currentActiveTab && $currentActiveTab !== $this->activeTab) {
+            $tabs = $this->getTabsCollection();
+            
+            // Validate the tab exists and is accessible
+            if ($tabs->has($currentActiveTab) && $tabs->get($currentActiveTab)->canAccess()) {
+                $this->activeTab = $currentActiveTab;
+                
+                // Ensure the tab content is loaded for rendering
+                $this->markTabAsLoaded($currentActiveTab);
+            }
+        }
+        
+        // Ensure we always have a valid active tab
+        if (!$this->activeTab || !$this->getTabsCollection()->has($this->activeTab)) {
+            $firstTab = $this->getTabsCollection()->first();
+            if ($firstTab && $firstTab->canAccess()) {
+                $this->activeTab = $firstTab->getId();
+                $this->markTabAsLoaded($this->activeTab);
+            }
         }
         
         // Use the direction setting directly
@@ -651,6 +694,9 @@ abstract class NapTab extends Component
         return [
             'browser:popstate' => 'handleBrowserNavigation',
             'tab:preload' => 'preloadTab',
+            'tab:forceReload' => 'forceReloadTab',
+            'navigate:before' => 'handleNavigateBefore',
+            'navigate:after' => 'handleNavigateAfter',
         ];
     }
 
@@ -658,9 +704,18 @@ abstract class NapTab extends Component
      * Handle browser navigation events (for cases where wire:navigate isn't used)
      * @param array<string, mixed> $data
      */
-    public function handleBrowserNavigation(array $data): void
+    public function handleBrowserNavigation(array $data = []): void
     {
+        // Try to get tab from provided data first, then from current route
         $tabFromUrl = $data['tab'] ?? '';
+        
+        // If no tab provided in data, try to extract from current route
+        if (!$tabFromUrl && $this->isRoutable()) {
+            $currentRoute = request()->route();
+            if ($currentRoute && in_array('activeTab', $currentRoute->parameterNames())) {
+                $tabFromUrl = $currentRoute->parameter('activeTab') ?? '';
+            }
+        }
 
         if ($tabFromUrl && $this->getTabsCollection()->has($tabFromUrl)) {
             $tab = $this->getTabsCollection()->get($tabFromUrl);
@@ -690,10 +745,90 @@ abstract class NapTab extends Component
         }
     }
 
-    public function preloadTab(string $tabId): void
+    /**
+     * Force reload a specific tab's content
+     */
+    public function forceReloadTab(string $tabId = ''): void
     {
-        if (!$this->isTabLoaded($tabId)) {
-            $this->loadTabContent($tabId);
+        if (!$tabId || !$this->getTabsCollection()->has($tabId)) {
+            return;
         }
+        
+        // Remove from loaded tabs to force reload
+        unset($this->loadedTabs[$tabId]);
+        unset($this->tabErrors[$tabId]);
+        
+        // If this is the active tab, mark it as loaded to trigger content refresh
+        if ($this->activeTab === $tabId) {
+            $this->markTabAsLoaded($tabId);
+        }
+        
+        $this->dispatch('tab:reloaded', ['tabId' => $tabId]);
+    }
+    
+    /**
+     * Handle wire:navigate before event
+     */
+    public function handleNavigateBefore(array $data = []): void
+    {
+        // Store current state before navigation
+        $this->dispatch('tab:navigationStarted', [
+            'currentTab' => $this->activeTab,
+            'timestamp' => now()->timestamp
+        ]);
+    }
+    
+    /**
+     * Handle wire:navigate after event  
+     */
+    public function handleNavigateAfter(array $data = []): void
+    {
+        // Ensure the component state is properly synchronized after navigation
+        if ($this->isRoutable()) {
+            $routeActiveTab = $this->getCurrentActiveTab();
+            
+            if ($routeActiveTab && $routeActiveTab !== $this->activeTab) {
+                // Force the active tab to be the one from the route
+                $this->activeTab = $routeActiveTab;
+                $this->markTabAsLoaded($routeActiveTab);
+            }
+        }
+        
+        $this->dispatch('tab:navigationCompleted', [
+            'activeTab' => $this->activeTab,
+            'timestamp' => now()->timestamp
+        ]);
+    }
+
+    public function preloadTab(string $tabId = ''): void
+    {
+        if (!$tabId || $this->isTabLoaded($tabId)) {
+            return;
+        }
+        
+        $this->loadTabContent($tabId);
+    }
+    
+    /**
+     * Check if the current request is from a navigation event
+     * This helps prevent redundant redirects during hydration
+     */
+    private function isFromNavigation(): bool
+    {
+        // Check for wire:navigate request headers
+        $request = request();
+        
+        // Livewire navigation requests typically have specific headers
+        if ($request->header('X-Livewire-Navigate') || 
+            $request->header('X-Livewire') && $request->header('X-Requested-With') === 'XMLHttpRequest') {
+            return true;
+        }
+        
+        // Check if we're in a hydration cycle (component is being re-rendered)
+        if (method_exists($this, 'isHydrating') && $this->isHydrating()) {
+            return true;
+        }
+        
+        return false;
     }
 }

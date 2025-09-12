@@ -152,8 +152,26 @@
         @endphp
 
         @if ($hasUrlNavigation && $tabUrl)
-        <a href="{{ $tabUrl }}" wire:navigate wire:key="tab-nav-{{ $tab->getId() }}" @else <button type="button"
-                wire:click="switchTab('{{ $tab->getId() }}')" wire:key="tab-btn-{{ $tab->getId() }}" @endif
+        <a href="{{ $tabUrl }}" 
+           wire:navigate 
+           wire:key="tab-nav-{{ $tab->getId() }}"
+           data-tab-id="{{ $tab->getId() }}"
+           data-tab-url="{{ $tabUrl }}"
+           @click="
+               // Prevent rapid navigation that causes request interruption
+               if (window.navigatingToTab) {
+                   $event.preventDefault();
+                   return false;
+               }
+               window.navigatingToTab = true;
+               setTimeout(() => { window.navigatingToTab = false; }, 1000);
+           "
+        @else 
+        <button type="button"
+                wire:click="switchTab('{{ $tab->getId() }}')" 
+                wire:key="tab-btn-{{ $tab->getId() }}"
+                data-tab-id="{{ $tab->getId() }}"
+        @endif
                 class="{{ $isActive ? $activeClasses : $inactiveClasses }} {{ $tab->isDisabled() ? 'opacity-40 cursor-not-allowed pointer-events-none grayscale' : ($isActive ? 'cursor-default' . ($currentStyle !== 'pills' ? ' tab-active-premium' : '') : 'cursor-pointer tab-hover-simple') }} {{ $spacing['tab_padding'] }} {{ $transitionDuration }} {{ $transitionTiming }} tab-button {{ $borderRadius }} group relative flex-shrink-0 overflow-hidden whitespace-nowrap text-sm font-medium transition-all focus:outline-none"
                 id="tab-{{ $tab->getId() }}"
                 role="tab"

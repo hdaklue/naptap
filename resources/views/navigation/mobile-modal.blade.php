@@ -10,10 +10,10 @@
     
     {{-- Active Tab Button --}}
     <button x-on:click="modalOpen = !modalOpen; if (modalOpen) { document.body.style.overflow = 'hidden'; } else { document.body.style.overflow = ''; }" 
-        class="w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-{{ $secondaryColor }}-800 border border-{{ $secondaryColor }}-300 dark:border-{{ $secondaryColor }}-600 rounded-lg {{ $shadowEnabled ? 'shadow-sm' : '' }} hover:bg-{{ $secondaryColor }}-50 dark:hover:bg-{{ $secondaryColor }}-700 transition-all duration-200 active:scale-[0.98]">
+        class="w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-{{ $secondaryColor }}-800 border border-{{ $primaryColor }}-300 dark:border-{{ $primaryColor }}-600 rounded-lg {{ $shadowEnabled ? 'shadow-sm' : '' }} hover:bg-{{ $primaryColor }}-50 dark:hover:bg-{{ $primaryColor }}-700/20 transition-all duration-200 active:scale-[0.98]">
         
         {{-- Active tab content --}}
-        <div class="flex items-center gap-3 min-w-0 flex-1">
+        <div class="flex items-center gap-3 min-w-0 flex-1" wire:key="mobile-trigger-content-{{ $activeTab }}">
             @foreach($tabs as $tab)
                 @if($activeTab === $tab->getId())
                     {{-- Tab icon --}}
@@ -41,7 +41,7 @@
         
         {{-- Hamburger menu icon --}}
         <div class="flex-shrink-0 ms-3">
-            <svg class="w-5 h-5 text-{{ $secondaryColor }}-500 dark:text-{{ $secondaryColor }}-400 transition-transform duration-200" 
+            <svg class="w-5 h-5 text-{{ $primaryColor }}-500 dark:text-{{ $primaryColor }}-400 transition-transform duration-200" 
                  :class="modalOpen ? 'rotate-90' : ''" 
                  fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
@@ -127,7 +127,7 @@
                         <button type="button" wire:click="switchTab('{{ $tab->getId() }}')"
                     @endif
                         x-on:click="modalOpen = false; document.body.style.overflow = ''"
-                        class="w-full flex items-center gap-3 px-4 py-4 text-start hover:bg-{{ $secondaryColor }}-50 dark:hover:bg-{{ $secondaryColor }}-800 transition-colors {{ $isActive ? 'bg-' . $primaryColor . '-50 dark:bg-' . $primaryColor . '-900/20 border-e-2 border-' . $primaryColor . '-500' : '' }}"
+                        class="w-full flex items-center gap-3 px-4 py-4 text-start hover:bg-{{ $secondaryColor }}-50 dark:hover:bg-{{ $secondaryColor }}-800 transition-colors {{ $isActive ? 'bg-' . $primaryColor . '-50 dark:bg-' . $primaryColor . '-900/20 border-e-2 border-' . $primaryColor . '-500 dark:border-' . $primaryColor . '-400' : 'bg-white dark:bg-' . $secondaryColor . '-900' }}"
                         {{ $tab->isDisabled() ? 'disabled' : '' }}>
                         
                         {{-- Tab icon --}}
@@ -138,21 +138,17 @@
                             </div>
                         @endif
                         
-                        {{-- Tab content --}}
-                        <div class="min-w-0 flex-1 flex items-center justify-between">
-                            <div class="min-w-0 flex-1">
-                                <span class="font-medium {{ $isActive ? 'text-' . $primaryColor . '-900 dark:text-' . $primaryColor . '-100' : 'text-' . $secondaryColor . '-900 dark:text-' . $secondaryColor . '-100' }} truncate block">
-                                    {{ $tab->getLabel() }}
-                                </span>
-                            </div>
-                            
-                            {{-- Badge --}}
-                            @if($tab->getBadge())
-                                <span class="ms-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $isActive ? 'bg-' . $primaryColor . '-100 text-' . $primaryColor . '-800 dark:bg-' . $primaryColor . '-800 dark:text-' . $primaryColor . '-200' : 'bg-' . $secondaryColor . '-100 text-' . $secondaryColor . '-800 dark:bg-' . $secondaryColor . '-700 dark:text-' . $secondaryColor . '-200' }} flex-shrink-0">
-                                    {{ $tab->getBadge() }}
-                                </span>
-                            @endif
-                        </div>
+                        {{-- Tab text - takes full available width --}}
+                        <span class="font-medium {{ $isActive ? 'text-' . $primaryColor . '-900 dark:text-' . $primaryColor . '-100' : 'text-' . $secondaryColor . '-900 dark:text-' . $secondaryColor . '-100' }} truncate flex-1 min-w-0">
+                            {{ $tab->getLabel() }}
+                        </span>
+                        
+                        {{-- Badge --}}
+                        @if($tab->getBadge())
+                            <span class="ms-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $isActive ? 'bg-' . $primaryColor . '-100 text-' . $primaryColor . '-800 dark:bg-' . $primaryColor . '-800 dark:text-' . $primaryColor . '-200' : 'bg-' . $secondaryColor . '-100 text-' . $secondaryColor . '-800 dark:bg-' . $secondaryColor . '-700 dark:text-' . $secondaryColor . '-200' }} flex-shrink-0">
+                                {{ $tab->getBadge() }}
+                            </span>
+                        @endif
                         
                         {{-- Active indicator --}}
                         @if($isActive)

@@ -94,7 +94,7 @@
                 @foreach($tabs as $tab)
                     @php
                         $config = app('naptab.config')->toArray();
-                        $isRoutable = $config['styles']['routing']['enabled'] ?? true;
+                        $isRoutable = $this->isRoutable();
                         $currentRoute = request()->route();
                         $hasActiveTabParam = $currentRoute && in_array('activeTab', $currentRoute->parameterNames());
                         $hasUrlNavigation = $isRoutable && $hasActiveTabParam;

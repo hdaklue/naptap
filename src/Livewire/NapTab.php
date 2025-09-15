@@ -637,6 +637,7 @@ abstract class NapTab extends Component
             'tabErrors' => $this->tabErrors,
             'navigationScript' => $this->getNavigationJavaScript(),
             'styles' => $config['styles'],
+            'colors' => $config['colors'],
             'spacing' => $config['styles']['spacing'],
             'direction' => $direction,
         ]);

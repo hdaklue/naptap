@@ -23,7 +23,7 @@
 >
     <div x-show="!mounted && !error" class="flex items-center justify-center py-8">
         <div class="text-center">
-            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto mb-3"></div>
+            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-{{ app('naptab.config')->toArray()['colors']['primary'] }}-500 mx-auto mb-3"></div>
             <p class="text-gray-500 text-sm">Mounting {{ $component }}...</p>
         </div>
     </div>

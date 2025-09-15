@@ -28,6 +28,7 @@
                     'tabs' => $tabs,
                     'activeTab' => $activeTab,
                     'styles' => $styles,
+                    'colors' => $colors,
                     'spacing' => $spacing,
                     'direction' => $direction,
                 ])
@@ -36,6 +37,7 @@
                     'tabs' => $tabs,
                     'activeTab' => $activeTab,
                     'styles' => $styles,
+                    'colors' => $colors,
                     'spacing' => $spacing,
                     'direction' => $direction,
                 ])
@@ -44,6 +46,7 @@
                     'tabs' => $tabs,
                     'activeTab' => $activeTab,
                     'styles' => $styles,
+                    'colors' => $colors,
                     'spacing' => $spacing,
                     'direction' => $direction,
                 ])
@@ -60,7 +63,7 @@
                 <div
                     class="wire:loading:scale-100 scale-95 transform text-center transition-transform duration-200 ease-out">
                     <div
-                        class="mx-auto mb-3 h-6 w-6 animate-spin rounded-full border-b-2 border-blue-500 dark:border-blue-400">
+                        class="mx-auto mb-3 h-6 w-6 animate-spin rounded-full border-b-2 border-{{ $colors['primary'] }}-500 dark:border-{{ $colors['primary'] }}-400">
                     </div>
                     <p class="text-sm text-gray-600 dark:text-gray-400">Loading...</p>
                 </div>
@@ -198,10 +201,9 @@
 
         /* Smooth focus states */
         .tab-focus-ring:focus-visible {
-            outline: none;
-            ring-offset: 2px;
-            ring-color: rgb(59 130 246 / 0.5);
-            ring-width: 2px;
+            outline: none !important;
+            ring-offset-width: 2px !important;
+            ring-width: 2px !important;
         }
 
         /* Reduce motion for accessibility */

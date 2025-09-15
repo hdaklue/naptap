@@ -154,7 +154,7 @@
         @if ($hasUrlNavigation && $tabUrl)
         <a href="{{ $tabUrl }}" wire:navigate wire:key="tab-nav-{{ $tab->getId() }}" @else <button type="button"
                 wire:click="switchTab('{{ $tab->getId() }}')" wire:key="tab-btn-{{ $tab->getId() }}" @endif
-                class="{{ $isActive ? $activeClasses : $inactiveClasses }} {{ $tab->isDisabled() ? 'opacity-40 cursor-not-allowed pointer-events-none grayscale' : ($isActive ? 'cursor-default' . ($currentStyle !== 'pills' ? ' tab-active-premium' : '') : 'cursor-pointer tab-hover-simple') }} {{ $spacing['tab_padding'] }} {{ $transitionDuration }} {{ $transitionTiming }} tab-button {{ $borderRadius }} group relative flex-shrink-0 overflow-hidden whitespace-nowrap text-sm font-medium transition-all focus:outline-none"
+                class="{{ $isActive ? $activeClasses : $inactiveClasses }} {{ $tab->isDisabled() ? 'opacity-40 cursor-not-allowed pointer-events-none grayscale' : ($isActive ? 'cursor-default' . ($currentStyle !== 'pills' ? ' tab-active-premium' : '') : 'cursor-pointer tab-hover-simple') }} {{ $spacing['tab_padding'] }} {{ $transitionDuration }} {{ $transitionTiming }} tab-button {{ $borderRadius }} group relative flex-shrink-0 overflow-hidden whitespace-nowrap text-sm font-medium transition-all focus:outline-none tab-focus-ring focus:ring-{{ $primaryColor }}-500/50"
                 id="tab-{{ $tab->getId() }}"
                 role="tab"
                 aria-selected="{{ $isActive ? 'true' : 'false' }}"
